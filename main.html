@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Shinycolors Spine Viewer</title>
+        <link rel="stylesheet" href="style.css" />
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://esotericsoftware.com/files/runtimes/spine-ts/build/spine-webgl.js"></script>
+    </head>
+    <body ondrop="DropHandler(event);" ondragover="DragOverHandler(event);">
+        <canvas id="canvas"></canvas>
+        <div>
+            <span>Idol:</span>
+            <select id="idolList"></select>
+            <span>Clothes:</span>
+            <select id="clothesList"></select>
+            <span>Type:</span>
+            <select id="typeList"></select>
+            <span>Animation:</span>
+            <select id="animationList"></select>
+
+            <span>Background Color:</span>
+            <input id="color-picker" type="color" />
+            <button onclick="ClearTrack();">Reset Animation</button>
+        </div>
+        <script src="main.js"></script>
+    </body>
+</html>
