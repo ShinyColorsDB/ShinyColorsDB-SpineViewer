@@ -18,12 +18,15 @@ let assetType = "cb";
 let assetID = "0000010010";
 let idolDir;
 
-let idolInfo = JSON.parse(localStorage.getItem("idolInfo"));
+let idolInfo = null, idolID = null, idolName = null;
+let dressInfo = null, dressID = null, dressType = null;
+const BIG0 = "big_cloth0", BIG1 = "big_cloth1", SML0 = "sml_cloth0", SML1 = "sml_cloth1";
+//JSON.parse(localStorage.getItem("idolInfo"))
 let assetInfo = {};
 
 let backgroundColor = [0, 0, 0];
 
-const dataURL = "https://spine.shinycolors.moe/";
+const dataURL = "https://static.shinycolors.moe/spines";
 
 const $ = document.querySelectorAll.bind(document);
 
@@ -54,7 +57,8 @@ async function Init() {
 
     // 애셋 불러오기
     if (!idolInfo) {
-        idolInfo = (await axios.get(dataURL + "/idolList.json")).data;
+        idolInfo = (await axios.get("https://api.shinycolors.moe/spines/idolList")).data;
+        //console.log(idolInfo);
         localStorage.setItem("idolInfo", JSON.stringify(idolInfo));
     }
     //gameInfo = [{ id: 0, dir: "00-haduki", name: "七草はづき" }, { id: 1, dir: "01-mano", name: "櫻木真乃"}];
@@ -85,8 +89,7 @@ async function Init() {
     };
 
     SetupIdolList();
-
-    return;
+    SetupDressList();
     SetupTypeList();
 
     LoadAsset();
@@ -176,7 +179,7 @@ function LoadAsset() {
     // 메모리 관리를 위한 unload 작업
     assetManager.removeAll();
 
-    const path = [dataURL, "assets", assetType, assetID, "data"].join("/");
+    const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"].join("/");
     assetManager.loadText(pathJSON || path + ".json");
     assetManager.loadText(pathAtlas || path + ".atlas");
     assetManager.loadTexture(pathTexture || path + ".png");
@@ -190,7 +193,6 @@ function Load() {
         asset = LoadSpine("wait", false);
 
         SetupAnimationList();
-        SetupSkinList();
 
         requestAnimationFrame(Render);
     } else {
@@ -201,9 +203,10 @@ function Load() {
 function LoadSpine(initialAnimation, premultipliedAlpha) {
     // Load the texture atlas using name.atlas and name.png from the AssetManager.
     // The function passed to TextureAtlas is used to resolve relative paths.
-    const fileArray = [dataURL, "assets", assetType, assetID, "data"];
+    const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"];
     const filePath = fileArray.join("/");
     const subPath = fileArray.slice(0, 4).join("/");
+    console.log(filePath);
 
     atlas = new spine.TextureAtlas(
         assetManager.get(pathAtlas || filePath + ".atlas"),
@@ -296,7 +299,7 @@ function CalculateBounds(skeleton) {
     skeleton.getBounds(offset, size, []);
     return { offset: offset, size: size };
 }
-
+/*
 function SetupTypeList() {
     const typeList = $("#typeList")[0];
     const typeTextList = gameInfo.type;
@@ -323,10 +326,10 @@ function SetupTypeList() {
     firstNode.selected = true;
     assetType = firstNode.value;
 }
-
+*/
 function SetupIdolList() {
     const idolList = $("#idolList")[0];
-    console.log(idolList)
+    //console.log(idolList)
     //const idolTextList = gameInfo.idol;
 
     idolList.innerHTML = "";
@@ -341,23 +344,107 @@ function SetupIdolList() {
         idolList.appendChild(option);
     }
 */
+    console.log(idolInfo);
     idolInfo.forEach(element => {
-        console.log(element);
         const option = document.createElement("option");
-        option.textContent = element.name;
-        option.value = element.directory;
+        option.textContent = element.IdolName;
+        option.value = element.IdolID;
         idolList.appendChild(option);
     });
     //return;
     idolList.onchange = () => {
-        idolDir = idolList.value;
+        idolID = idolList.value;
+        SetupDressList();
+        SetupTypeList();
         ClearDragStatus();
         requestAnimationFrame(LoadAsset);
     };
 
     const firstNode = $("#idolList option")[0];
     firstNode.selected = true;
-    idolDir = firstNode.value;
+    idolID = firstNode.value;
+}
+
+async function SetupDressList() {
+    const dressList = $("#dressList")[0];
+    dressList.innerHTML = "";
+
+    dressInfo = (await axios.get(`https://api.shinycolors.moe/spines/dressList/${idolID}`)).data;
+    console.log(dressInfo);
+
+    dressInfo.forEach((element, index) => {
+        const option = document.createElement("option");
+        option.textContent = element.DressName;
+        option.value = index;
+        dressList.appendChild(option);
+    });
+
+    dressList.onchange = () => {
+        dressID = dressList.value;
+        console.log(dressList.value);
+        SetupTypeList();
+        ClearDragStatus();
+        requestAnimationFrame(LoadAsset);
+
+    }
+
+    dressID = 0;
+}
+
+function SetupTypeList() {
+    const typeList = $("#typeList")[0];
+
+    typeList.innerHTML = "";
+
+    let big0, big1, sml0, sml1;
+    let flag0 = false, flag1 = false;
+    if (dressInfo[dressID].Dress0) {
+        big0 = document.createElement("option");
+        big0.textContent = "一般_通常服";
+        big0.value = BIG0;
+
+        sml0 = document.createElement("option");
+        sml0.textContent = "Q版_通常服";
+        sml0.value = SML0;
+        flag0 = true;
+    }
+    if (dressInfo[dressID].Dress1) {
+        big1 = document.createElement("option");
+        big1.textContent = "一般_演出服";
+        big1.value = BIG1;
+
+        sml1 = document.createElement("option");
+        sml1.textContent = "Q版_演出服";
+        sml1.value = SML1;
+        flag1 = true;
+    }
+
+    if (flag0 && flag1) {
+        dressType = SML0;
+        typeList.appendChild(sml0);
+        typeList.appendChild(sml1);
+        typeList.appendChild(big0);
+        typeList.appendChild(big1);
+    }
+    else if (flag0 && !flag1) {
+        dressType = BIG0;
+        typeList.appendChild(sml0);
+        typeList.appendChild(big0);
+    }
+    else if (!flag0 && flag1) {
+        dressType = BIG1;
+        typeList.appendChild(sml1);
+        typeList.appendChild(big1);
+    }
+
+    typeList.onchange = () => {
+        dressType = typeList.value;
+        ClearDragStatus();
+        requestAnimationFrame(LoadAsset);
+    }
+
+    SetupAnimationList();
+    //console.log(dressInfo[dressID]);
 }
 
 function SetupAnimationList() {
