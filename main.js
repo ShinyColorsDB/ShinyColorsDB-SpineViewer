@@ -22,7 +22,7 @@ let assetInfo = {};
 
 let backgroundColor = [0, 0, 0];
 
-const dataURL = "https://shinycolors.info/utils/shany-anim-viewer/docs";
+const dataURL = "https://spine.shinycolors.moe/";
 
 const $ = document.querySelectorAll.bind(document);
 
