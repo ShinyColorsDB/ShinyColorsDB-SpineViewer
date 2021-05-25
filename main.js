@@ -22,7 +22,6 @@ let idolInfo = null, idolID = null, idolName = null;
 let dressInfo = null, dressID = null, dressType = null;
 const BIG0 = "big_cloth0", BIG1 = "big_cloth1", SML0 = "sml_cloth0", SML1 = "sml_cloth1";
 //JSON.parse(localStorage.getItem("idolInfo"))
-let assetInfo = {};
 
 let backgroundColor = [0, 0, 0];
 
@@ -60,26 +59,6 @@ async function Init() {
         idolInfo = (await axios.get("https://api.shinycolors.moe/spines/idolList")).data;
         //console.log(idolInfo);
         localStorage.setItem("idolInfo", JSON.stringify(idolInfo));
-    }
-    //gameInfo = [{ id: 0, dir: "00-haduki", name: "七草はづき" }, { id: 1, dir: "01-mano", name: "櫻木真乃"}];
-    //assetInfo = (await axios.get(dataURL + "/asset.json")).data;
-
-    // 애셋 데이터 가공
-    for (let key in assetInfo) {
-        assetInfo[key] = assetInfo[key].map((id) => {
-            const idArray = id.split("").map((item) => {
-                return parseInt(item);
-            });
-            return {
-                value: id,
-                type: idArray.shift(),
-                special_type: idArray.shift(),
-                rarity: idArray.shift(),
-                idol_id: parseInt(idArray.splice(0, 3).join("")),
-                release_id: parseInt(idArray.splice(0, 3).join("")),
-                other: idArray.shift()
-            };
-        });
     }
 
     // 배경 색상 선택기
@@ -233,20 +212,14 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     const skeletonData = skeletonJson.readSkeletonData(jsonData);
     const skeleton = new spine.Skeleton(skeletonData);
     try {
-        skeleton.setSkinByName("normal"); // SD 일러스트 기본 스킨
+        skeleton.setSkinByName("normal");
     } catch (e) { }
 
     // Create an AnimationState, and set the initial animation in looping mode.
     animationStateData = new spine.AnimationStateData(skeleton.data);
-    animationStateData.defaultMix = 0.3; // 애니메이션 사이를 부드럽게 전환. 값을 높일수록 느리게 전환됨
+    animationStateData.defaultMix = 0.3;
     const animationState = new spine.AnimationState(animationStateData);
-    animationState.multipleMixing = true; // 여러 애니메이션의 믹싱을 활성화.
-
-    // animationStateData.setMix("wait", "ok", 0.4);
-    // animationStateData.setMix("jump", "run", 0.4);
-    // animationState.setAnimation(0, "walk", true);
-    // let jumpEntry = animationState.addAnimation(0, "jump", false, 3);
-    // animationState.addAnimation(0, "run", true, 0);
+    animationState.multipleMixing = true;
 
     try {
         animationState.setAnimation(0, initialAnimation, true);
@@ -299,51 +272,14 @@ function CalculateBounds(skeleton) {
     skeleton.getBounds(offset, size, []);
     return { offset: offset, size: size };
 }
-/*
-function SetupTypeList() {
-    const typeList = $("#typeList")[0];
-    const typeTextList = gameInfo.type;
 
-    typeList.innerHTML = "";
-
-    for (const type of Object.keys(assetInfo)) {
-        const option = document.createElement("option");
-        const typeText = _.find(typeTextList, { id: type }) || { name: "타입" };
-        option.textContent = typeText.name;
-        option.value = type;
-        option.selected = type === assetType;
-        typeList.appendChild(option);
-    }
-
-    typeList.onchange = () => {
-        assetType = typeList.value;
-        SetupIdolList();
-        ClearDragStatus();
-        requestAnimationFrame(LoadAsset);
-    };
-
-    const firstNode = $("#typeList option")[0];
-    firstNode.selected = true;
-    assetType = firstNode.value;
-}
-*/
 function SetupIdolList() {
     const idolList = $("#idolList")[0];
     //console.log(idolList)
     //const idolTextList = gameInfo.idol;
 
     idolList.innerHTML = "";
-/*
-    for (const asset of assetInfo[assetType]) {
-        const option = document.createElement("option");
-        const idolText = _.find(idolTextList, { id: asset.idol_id }) || {
-            name: "아이돌"
-        };
-        option.textContent = idolText.name.split(" ").pop();
-        option.value = asset.value;
-        idolList.appendChild(option);
-    }
-*/
+
     console.log(idolInfo);
     idolInfo.forEach(element => {
         const option = document.createElement("option");
@@ -421,6 +357,7 @@ function SetupTypeList() {
 
     if (flag0 && flag1) {
         dressType = SML0;
+        sml0.selected = true;
         typeList.appendChild(sml0);
         typeList.appendChild(sml1);
         typeList.appendChild(big0);
@@ -428,11 +365,13 @@ function SetupTypeList() {
     }
     else if (flag0 && !flag1) {
         dressType = BIG0;
+        big0.selected = true;
         typeList.appendChild(sml0);
         typeList.appendChild(big0);
     }
     else if (!flag0 && flag1) {
         dressType = BIG1;
+        big1.selected = true;
         typeList.appendChild(sml1);
         typeList.appendChild(big1);
     }
@@ -468,6 +407,7 @@ function SetupAnimationList() {
         const state = asset.state;
         const skeleton = asset.skeleton;
         const animationName = animationList.value;
+        ClearTrack();
         skeleton.setToSetupPose();
 
         let trackIndex = 0;
