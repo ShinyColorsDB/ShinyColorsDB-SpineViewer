@@ -1,9 +1,11 @@
-var fs = require("fs");
+const idolList = require("./idolList.json");
 
-let result = [];
+let fs = require("fs");
 
-fs.readdir("./assets", function (error, dirList) {
-    let idoldir = [];
-    console.log(dirList);
-    //result
+let directory = [];
+
+idolList.forEach(element => {
+    fs.readdir(`./assets/${element.directory}`, (err, result) => {
+        console.log(result);
+    });
 });

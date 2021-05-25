@@ -1,12 +1,12 @@
-var lastFrameTime = Date.now() / 1000;
-var canvas;
-var shader;
-var batcher;
-var WebGL;
+let lastFrameTime = Date.now() / 1000;
+let canvas;
+let shader;
+let batcher;
+let WebGL;
 const mvp = new spine.webgl.Matrix4();
-var assetManager;
-var skeletonRenderer;
-var shapes;
+let assetManager;
+let skeletonRenderer;
+let shapes;
 
 let pathJSON = null;
 let pathAtlas = null;
@@ -16,8 +16,9 @@ let asset = null;
 
 let assetType = "cb";
 let assetID = "0000010010";
+let idolDir;
 
-let gameInfo = {};
+let idolInfo = JSON.parse(localStorage.getItem("idolInfo"));
 let assetInfo = {};
 
 let backgroundColor = [0, 0, 0];
@@ -38,7 +39,7 @@ async function Init() {
         canvas.getContext("webgl", config) ||
         canvas.getContext("experimental-webgl", config);
     if (!WebGL) {
-        alert("WebGL을 사용할 수 없는 환경입니다.");
+        alert("WebGL");
         return;
     }
 
@@ -52,9 +53,12 @@ async function Init() {
     shader = spine.webgl.Shader.newColoredTextured(WebGL);
 
     // 애셋 불러오기
-    //gameInfo = (await axios.get(dataURL + "/game.json")).data;
-    gameInfo = [{ id: 0, dir: "00-haduki", name: "七草はづき" }, { id: 1, dir: "01-mano", name: "櫻木真乃"}];
-    assetInfo = (await axios.get(dataURL + "/asset.json")).data;
+    if (!idolInfo) {
+        idolInfo = (await axios.get(dataURL + "/idolList.json")).data;
+        localStorage.setItem("idolInfo", JSON.stringify(idolInfo));
+    }
+    //gameInfo = [{ id: 0, dir: "00-haduki", name: "七草はづき" }, { id: 1, dir: "01-mano", name: "櫻木真乃"}];
+    //assetInfo = (await axios.get(dataURL + "/asset.json")).data;
 
     // 애셋 데이터 가공
     for (let key in assetInfo) {
@@ -80,8 +84,10 @@ async function Init() {
         backgroundColor = HexToRgb(event.target.value);
     };
 
-    SetupTypeList();
     SetupIdolList();
+
+    return;
+    SetupTypeList();
 
     LoadAsset();
 }
@@ -236,7 +242,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     // animationStateData.setMix("wait", "ok", 0.4);
     // animationStateData.setMix("jump", "run", 0.4);
     // animationState.setAnimation(0, "walk", true);
-    // var jumpEntry = animationState.addAnimation(0, "jump", false, 3);
+    // let jumpEntry = animationState.addAnimation(0, "jump", false, 3);
     // animationState.addAnimation(0, "run", true, 0);
 
     try {
@@ -285,8 +291,8 @@ let debug = false;
 function CalculateBounds(skeleton) {
     skeleton.setToSetupPose();
     skeleton.updateWorldTransform();
-    var offset = new spine.Vector2();
-    var size = new spine.Vector2();
+    let offset = new spine.Vector2();
+    let size = new spine.Vector2();
     skeleton.getBounds(offset, size, []);
     return { offset: offset, size: size };
 }
@@ -320,10 +326,11 @@ function SetupTypeList() {
 
 function SetupIdolList() {
     const idolList = $("#idolList")[0];
-    const idolTextList = gameInfo.idol;
+    console.log(idolList)
+    //const idolTextList = gameInfo.idol;
 
     idolList.innerHTML = "";
-
+/*
     for (const asset of assetInfo[assetType]) {
         const option = document.createElement("option");
         const idolText = _.find(idolTextList, { id: asset.idol_id }) || {
@@ -333,16 +340,24 @@ function SetupIdolList() {
         option.value = asset.value;
         idolList.appendChild(option);
     }
-
+*/
+    idolInfo.forEach(element => {
+        console.log(element);
+        const option = document.createElement("option");
+        option.textContent = element.name;
+        option.value = element.directory;
+        idolList.appendChild(option);
+    });
+    //return;
     idolList.onchange = () => {
-        assetID = idolList.value;
+        idolDir = idolList.value;
         ClearDragStatus();
         requestAnimationFrame(LoadAsset);
     };
 
     const firstNode = $("#idolList option")[0];
     firstNode.selected = true;
-    assetID = firstNode.value;
+    idolDir = firstNode.value;
 }
 
 function SetupAnimationList() {
@@ -418,8 +433,8 @@ function SetupSkinList() {
 }
 
 function Render() {
-    var now = Date.now() / 1000;
-    var delta = now - lastFrameTime;
+    let now = Date.now() / 1000;
+    let delta = now - lastFrameTime;
     lastFrameTime = now;
 
     // 배경 그리기
@@ -435,9 +450,9 @@ function Render() {
     Resize();
 
     // Apply the animation state based on the delta time.
-    var state = asset.state;
-    var skeleton = asset.skeleton;
-    var premultipliedAlpha = asset.premultipliedAlpha;
+    let state = asset.state;
+    let skeleton = asset.skeleton;
+    let premultipliedAlpha = asset.premultipliedAlpha;
     state.update(delta);
     state.apply(skeleton);
     skeleton.updateWorldTransform();
@@ -458,23 +473,23 @@ function Render() {
 }
 
 function Resize() {
-    var w = canvas.clientWidth;
-    var h = canvas.clientHeight;
-    var bounds = asset.bounds;
+    let w = canvas.clientWidth;
+    let h = canvas.clientHeight;
+    let bounds = asset.bounds;
     if (canvas.width != w || canvas.height != h) {
         canvas.width = w;
         canvas.height = h;
     }
 
     // magic
-    var centerX = bounds.offset.x + bounds.size.x / 2;
-    var centerY = bounds.offset.y + bounds.size.y / 2;
-    var scaleX = bounds.size.x / canvas.width;
-    var scaleY = bounds.size.y / canvas.height;
-    var scale = Math.max(scaleX, scaleY) * 1.2;
+    let centerX = bounds.offset.x + bounds.size.x / 2;
+    let centerY = bounds.offset.y + bounds.size.y / 2;
+    let scaleX = bounds.size.x / canvas.width;
+    let scaleY = bounds.size.y / canvas.height;
+    let scale = Math.max(scaleX, scaleY) * 1.2;
     if (scale < 1) scale = 1;
-    var width = canvas.width * scale;
-    var height = canvas.height * scale;
+    let width = canvas.width * scale;
+    let height = canvas.height * scale;
 
     mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);
     WebGL.viewport(0, 0, canvas.width, canvas.height);
