@@ -14,8 +14,6 @@ let pathTexture = null;
 
 let asset = null;
 
-let assetType = "cb";
-let assetID = "0000010010";
 let idolDir;
 
 let idolInfo = null, idolID = null, idolName = null;
@@ -161,7 +159,7 @@ function LoadAsset() {
     const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"].join("/");
     assetManager.loadText(pathJSON || path + ".json");
     assetManager.loadText(pathAtlas || path + ".atlas");
-    assetManager.loadTexture(pathTexture || path + ".webp");
+    assetManager.loadTexture(pathTexture || path + ".png");
 
     requestAnimationFrame(Load);
 }
