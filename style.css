@@ -1,7 +1,7 @@
 * {
     margin: 0;
     padding: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Meiryo, Arial, Helvetica, sans-serif;
 }
 body,
 html {
@@ -30,4 +30,9 @@ select, input, button {
 }
 select {
     min-width: 100px;
+    font-family: "Meiryo", "Meiryo UI";
+}
+
+option {
+    font-family: "Meiryo", "Meiryo UI";
 }
