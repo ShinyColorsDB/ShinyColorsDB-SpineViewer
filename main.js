@@ -23,7 +23,7 @@ const BIG0 = "big_cloth0", BIG1 = "big_cloth1", SML0 = "sml_cloth0", SML1 = "sml
 
 let backgroundColor = [0, 0, 0];
 
-const dataURL = "https://static.shinycolors.moe/spines2";
+const dataURL = "https://static.shinycolors.moe/spines";
 
 const $ = document.querySelectorAll.bind(document);
 
@@ -157,7 +157,7 @@ function LoadAsset() {
     assetManager.removeAll();
 
     //const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"].join("/");
-    const path = [dataURL, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
+    const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
     assetManager.loadText(pathJSON || path + ".json");
     assetManager.loadText(pathAtlas || path + ".atlas");
     assetManager.loadTexture(pathTexture || path + ".png");
@@ -182,7 +182,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     // Load the texture atlas using name.atlas and name.png from the AssetManager.
     // The function passed to TextureAtlas is used to resolve relative paths.
     //const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"];
-    const fileArray = [dataURL, dressInfo[dressID].DressUUID, dressType, "data"];
+    const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"];
     const filePath = fileArray.join("/");
     const subPath = fileArray.slice(0, 4).join("/");
     console.log(filePath);
@@ -281,12 +281,14 @@ function SetupIdolList() {
     idolList.innerHTML = "";
 
     console.log(idolInfo);
-    idolInfo.forEach(element => {
+    idolInfo.forEach((element, index) => {
         const option = document.createElement("option");
         option.textContent = element.IdolName;
         option.value = element.IdolID;
+	if(index == 1) option.selected = true;
         idolList.appendChild(option);
     });
+    idolID = 1;
     //return;
     idolList.onchange = () => {
         idolID = idolList.value;
@@ -296,9 +298,6 @@ function SetupIdolList() {
         requestAnimationFrame(LoadAsset);
     };
 
-    const firstNode = $("#idolList option")[0];
-    firstNode.selected = true;
-    idolID = firstNode.value;
 }
 
 async function SetupDressList() {
@@ -312,8 +311,11 @@ async function SetupDressList() {
         const option = document.createElement("option");
         option.textContent = element.DressName;
         option.value = index;
+	if(!index) option.selected = true;
         dressList.appendChild(option);
     });
+
+    dressID = 0;
 
     dressList.onchange = () => {
         dressID = dressList.value;
@@ -324,7 +326,9 @@ async function SetupDressList() {
 
     }
 
-    dressID = 0;
+    SetupTypeList();
+    LoadAsset();
+
 }
 
 function SetupTypeList() {
@@ -334,7 +338,7 @@ function SetupTypeList() {
 
     let big0, big1, sml0, sml1;
     let flag0 = false, flag1 = false;
-    if (dressInfo[dressID].Dress0) {
+    if (dressInfo[dressID]?.Dress0) {
         big0 = document.createElement("option");
         big0.textContent = "一般_通常服";
         big0.value = BIG0;
@@ -344,7 +348,7 @@ function SetupTypeList() {
         sml0.value = SML0;
         flag0 = true;
     }
-    if (dressInfo[dressID].Dress1) {
+    if (dressInfo[dressID]?.Dress1) {
         big1 = document.createElement("option");
         big1.textContent = "一般_演出服";
         big1.value = BIG1;
@@ -356,8 +360,8 @@ function SetupTypeList() {
     }
 
     if (flag0 && flag1) {
-        dressType = SML0;
-        sml0.selected = true;
+        dressType = BIG0;
+        big0.selected = true;
         typeList.appendChild(sml0);
         typeList.appendChild(sml1);
         typeList.appendChild(big0);
@@ -382,7 +386,6 @@ function SetupTypeList() {
         requestAnimationFrame(LoadAsset);
     }
 
-    SetupAnimationList();
     //console.log(dressInfo[dressID]);
 }
 
