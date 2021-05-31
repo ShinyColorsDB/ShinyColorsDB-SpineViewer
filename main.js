@@ -23,7 +23,7 @@ const BIG0 = "big_cloth0", BIG1 = "big_cloth1", SML0 = "sml_cloth0", SML1 = "sml
 
 let backgroundColor = [0, 0, 0];
 
-const dataURL = "https://static.shinycolors.moe/spines";
+const dataURL = "https://static.shinycolors.moe/spines2";
 
 const $ = document.querySelectorAll.bind(document);
 
