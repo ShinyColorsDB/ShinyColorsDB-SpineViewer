@@ -180,7 +180,7 @@ function Load() {
 function LoadSpine(initialAnimation, premultipliedAlpha) {
     // Load the texture atlas using name.atlas and name.png from the AssetManager.
     // The function passed to TextureAtlas is used to resolve relative paths.
-    const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"];
+    const fileArray = [dataURL, dressInfo[dressID].DressUUID, dressType, "data"];
     const filePath = fileArray.join("/");
     const subPath = fileArray.slice(0, 4).join("/");
     console.log(filePath);
