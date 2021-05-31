@@ -156,6 +156,7 @@ function LoadAsset() {
     // 메모리 관리를 위한 unload 작업
     assetManager.removeAll();
 
+    //const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"].join("/");
     const path = [dataURL, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
     assetManager.loadText(pathJSON || path + ".json");
     assetManager.loadText(pathAtlas || path + ".atlas");
@@ -180,6 +181,7 @@ function Load() {
 function LoadSpine(initialAnimation, premultipliedAlpha) {
     // Load the texture atlas using name.atlas and name.png from the AssetManager.
     // The function passed to TextureAtlas is used to resolve relative paths.
+    //const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"];
     const fileArray = [dataURL, dressInfo[dressID].DressUUID, dressType, "data"];
     const filePath = fileArray.join("/");
     const subPath = fileArray.slice(0, 4).join("/");
