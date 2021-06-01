@@ -305,18 +305,21 @@ async function SetupDressList() {
     dressList.innerHTML = "";
 
     dressInfo = (await axios.get(`https://api.shinycolors.moe/spines/dressList/${idolID}`)).data;
-    console.log(dressInfo);
+    //console.log(dressInfo);
+    let flag = false;
 
     dressInfo.forEach((element, index) => {
+	if(element.Exist && !flag) {
+	    flag = true;
+	    dressID = index;
+	}
         const option = document.createElement("option");
         option.textContent = element.DressName;
         option.value = index;
 	if(!element.Exist) option.disabled = true;
-	if(!index) option.selected = true;
+	if(index == dressID) option.selected = true;
         dressList.appendChild(option);
     });
-
-    dressID = 0;
 
     dressList.onchange = () => {
         dressID = dressList.value;
