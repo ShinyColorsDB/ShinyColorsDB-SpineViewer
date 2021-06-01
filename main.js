@@ -311,6 +311,7 @@ async function SetupDressList() {
         const option = document.createElement("option");
         option.textContent = element.DressName;
         option.value = index;
+	if(!element.Exist) option.disabled = true;
 	if(!index) option.selected = true;
         dressList.appendChild(option);
     });
