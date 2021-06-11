@@ -16,9 +16,16 @@ let asset = null;
 
 let idolDir;
 
-let idolInfo = null, idolID = null, idolName = null;
-let dressInfo = null, dressID = null, dressType = null;
-const BIG0 = "big_cloth0", BIG1 = "big_cloth1", SML0 = "sml_cloth0", SML1 = "sml_cloth1";
+let idolInfo = null,
+    idolID = null,
+    idolName = null;
+let dressInfo = null,
+    dressID = null,
+    dressType = null;
+const BIG0 = "big_cloth0",
+    BIG1 = "big_cloth1",
+    SML0 = "sml_cloth0",
+    SML1 = "sml_cloth1";
 //JSON.parse(localStorage.getItem("idolInfo"))
 
 let backgroundColor = [0, 0, 0];
@@ -31,13 +38,9 @@ async function Init() {
     // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
     // loading textures. That is handled separately by PolygonBatcher.
     canvas = $("canvas")[0];
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 
     const config = { alpha: false };
-    WebGL =
-        canvas.getContext("webgl", config) ||
-        canvas.getContext("experimental-webgl", config);
+    WebGL = canvas.getContext("webgl", config) || canvas.getContext("experimental-webgl", config);
     if (!WebGL) {
         alert("WebGL");
         return;
@@ -74,11 +77,11 @@ async function Init() {
 
 function HexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-        ? result.slice(1, 4).map((item) => {
+    return result ?
+        result.slice(1, 4).map((item) => {
             return parseInt(item, 16) / 255;
-        })
-        : null;
+        }) :
+        null;
 }
 
 function DropHandler(event) {
@@ -119,18 +122,9 @@ function DropHandler(event) {
     if (pathAtlas && pathTexture && pathJSON) {
         requestAnimationFrame(LoadAsset);
     } else {
-        const loadedFiles = [
-            pathAtlas ? "Atlas" : null,
-            pathTexture ? "이미지" : null,
-            pathJSON ? "JSON" : null
-        ]
-            .filter((item) => item)
-            .join(", ");
+        const loadedFiles = [pathAtlas ? "Atlas" : null, pathTexture ? "이미지" : null, pathJSON ? "JSON" : null].filter((item) => item).join(", ");
 
-        alert(
-            "3개의 파일 (data.json, data.atlas, data.png) 을 한꺼번에 드롭해주세요.\n현재 불러온 파일: " +
-            loadedFiles
-        );
+        alert("3개의 파일 (data.json, data.atlas, data.png) 을 한꺼번에 드롭해주세요.\n현재 불러온 파일: " + loadedFiles);
         ClearDragStatus();
     }
 }
@@ -187,12 +181,9 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     const subPath = fileArray.slice(0, 4).join("/");
     console.log(filePath);
 
-    atlas = new spine.TextureAtlas(
-        assetManager.get(pathAtlas || filePath + ".atlas"),
-        (path) => {
-            return assetManager.get(pathTexture || [subPath, path].join("/"));
-        }
-    );
+    atlas = new spine.TextureAtlas(assetManager.get(pathAtlas || filePath + ".atlas"), (path) => {
+        return assetManager.get(pathTexture || [subPath, path].join("/"));
+    });
 
     // Create a AtlasAttachmentLoader that resolves region, mesh, boundingbox and path attachments
     atlasLoader = new spine.AtlasAttachmentLoader(atlas);
@@ -213,7 +204,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     const skeleton = new spine.Skeleton(skeletonData);
     try {
         skeleton.setSkinByName("normal");
-    } catch (e) { }
+    } catch (e) {}
 
     // Create an AnimationState, and set the initial animation in looping mode.
     animationStateData = new spine.AnimationStateData(skeleton.data);
@@ -229,26 +220,24 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
 
     if (debug) {
         animationState.addListener({
-            start: function (track) {
+            start: function(track) {
                 console.log("Animation on track " + track.trackIndex + " started");
             },
-            interrupt: function (track) {
+            interrupt: function(track) {
                 console.log("Animation on track " + track.trackIndex + " interrupted");
             },
-            end: function (track) {
+            end: function(track) {
                 console.log("Animation on track " + track.trackIndex + " ended");
             },
-            disposed: function (track) {
+            disposed: function(track) {
                 console.log("Animation on track " + track.trackIndex + " disposed");
             },
-            complete: function (track) {
+            complete: function(track) {
                 console.log("Animation on track " + track.trackIndex + " completed");
             },
-            event: function (track, event) {
-                console.log(
-                    "Event on track " + track.trackIndex + ": " + JSON.stringify(event)
-                );
-            }
+            event: function(track, event) {
+                console.log("Event on track " + track.trackIndex + ": " + JSON.stringify(event));
+            },
         });
     }
 
@@ -258,7 +247,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
         state: animationState,
         stateData: animationStateData,
         bounds: CalculateBounds(skeleton),
-        premultipliedAlpha: premultipliedAlpha
+        premultipliedAlpha: premultipliedAlpha,
     };
 }
 
@@ -285,7 +274,7 @@ function SetupIdolList() {
         const option = document.createElement("option");
         option.textContent = element.IdolName;
         option.value = element.IdolID;
-	if(index == 1) option.selected = true;
+        if (index == 1) option.selected = true;
         idolList.appendChild(option);
     });
     idolID = 1;
@@ -297,7 +286,6 @@ function SetupIdolList() {
         ClearDragStatus();
         requestAnimationFrame(LoadAsset);
     };
-
 }
 
 async function SetupDressList() {
@@ -309,15 +297,15 @@ async function SetupDressList() {
     let flag = false;
 
     dressInfo.forEach((element, index) => {
-	if(element.Exist && !flag) {
-	    flag = true;
-	    dressID = index;
-	}
+        if (element.Exist && !flag) {
+            flag = true;
+            dressID = index;
+        }
         const option = document.createElement("option");
         option.textContent = element.DressName;
         option.value = index;
-	if(!element.Exist) option.disabled = true;
-	if(index == dressID) option.selected = true;
+        if (!element.Exist) option.disabled = true;
+        if (index == dressID) option.selected = true;
         dressList.appendChild(option);
     });
 
@@ -327,12 +315,10 @@ async function SetupDressList() {
         SetupTypeList();
         ClearDragStatus();
         requestAnimationFrame(LoadAsset);
-
-    }
+    };
 
     SetupTypeList();
     LoadAsset();
-
 }
 
 function SetupTypeList() {
@@ -341,7 +327,8 @@ function SetupTypeList() {
     typeList.innerHTML = "";
 
     let big0, big1, sml0, sml1;
-    let flag0 = false, flag1 = false;
+    let flag0 = false,
+        flag1 = false;
     if (dressInfo[dressID]?.Dress0) {
         big0 = document.createElement("option");
         big0.textContent = "一般_通常服";
@@ -370,14 +357,12 @@ function SetupTypeList() {
         typeList.appendChild(sml1);
         typeList.appendChild(big0);
         typeList.appendChild(big1);
-    }
-    else if (flag0 && !flag1) {
+    } else if (flag0 && !flag1) {
         dressType = BIG0;
         big0.selected = true;
         typeList.appendChild(sml0);
         typeList.appendChild(big0);
-    }
-    else if (!flag0 && flag1) {
+    } else if (!flag0 && flag1) {
         dressType = BIG1;
         big1.selected = true;
         typeList.appendChild(sml1);
@@ -388,7 +373,7 @@ function SetupTypeList() {
         dressType = typeList.value;
         ClearDragStatus();
         requestAnimationFrame(LoadAsset);
-    }
+    };
 
     //console.log(dressInfo[dressID]);
 }
@@ -529,4 +514,4 @@ function Resize() {
     WebGL.viewport(0, 0, canvas.width, canvas.height);
 }
 
-Init();
+//Init();
