@@ -11,13 +11,18 @@ div span {
     padding: .5rem 2.25rem .375rem 1rem;
     border-radius: .4rem;
     box-shadow: 0 0 3pt 2pt #0e3155;
+    outline: none;
 }
 
-.form-select:focus {
+select:focus {
     box-shadow: 0 0 3pt 2pt #569ce2;
 }
 
 .form-input {
     border-radius: .4rem;
     box-shadow: none;
+}
+
+.form-input:focus {
+    outline: none !important;
 }
