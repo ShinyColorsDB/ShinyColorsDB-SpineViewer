@@ -26,7 +26,6 @@ const BIG0 = "big_cloth0",
     BIG1 = "big_cloth1",
     SML0 = "sml_cloth0",
     SML1 = "sml_cloth1";
-//JSON.parse(localStorage.getItem("idolInfo"))
 
 let backgroundColor = [0, 0, 0];
 
@@ -55,14 +54,12 @@ async function Init() {
     shapes = new spine.webgl.ShapeRenderer(WebGL);
     shader = spine.webgl.Shader.newColoredTextured(WebGL);
 
-    // 애셋 불러오기
     if (!idolInfo) {
         idolInfo = (await axios.get("https://api.shinycolors.moe/spines/idolList")).data;
         //console.log(idolInfo);
         localStorage.setItem("idolInfo", JSON.stringify(idolInfo));
     }
 
-    // 배경 색상 선택기
     const colorPicker = document.querySelector("#color-picker");
     colorPicker.onchange = (event) => {
         backgroundColor = HexToRgb(event.target.value);
@@ -144,10 +141,8 @@ function LoadAsset() {
     // Tell AssetManager to load the resources for each model, including the exported .json file, the .atlas file and the .png
     // file for the atlas. We then wait until all resources are loaded in the load() method.
 
-    // 현재 파일을 null로 설정하여 렌더링 중단
     asset = null;
 
-    // 메모리 관리를 위한 unload 작업
     assetManager.removeAll();
 
     //const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"].join("/");
@@ -191,7 +186,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     // Create a SkeletonJson instance for parsing the .json file.
     const skeletonJson = new spine.SkeletonJson(atlasLoader);
 
-    // 불투명도 버그 수정
+    // 
     const jsonData = JSON.parse(assetManager.get(pathJSON || filePath + ".json"));
     jsonData.slots.forEach((item) => {
         if (item.blend && item.name !== "eye_shadow_L") {
