@@ -34,6 +34,27 @@ const dataURL = "https://static.shinycolors.moe/spines";
 const $ = document.querySelectorAll.bind(document);
 
 async function Init() {
+    let modal = document.getElementById("divModalBody");
+    let updateInfo = (await axios.get("https://api.shinycolors.moe/spines/updateLog")).data;
+    updateInfo.forEach(element => {
+        let divTitle = document.createElement("div");
+        divTitle.classList.add("p-1");
+        let divContent = document.createElement("p");
+        divContent.classList.add("p-3");
+
+        element.Content.forEach(e => {
+            let span = document.createElement("span");
+            span.textContent = e;
+            span.classList.add("text-info");
+            divContent.appendChild(span);
+            divContent.appendChild(document.createElement("br"));
+        });
+        
+        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date.substr(0,10))));
+        modal.appendChild(divContent);
+    });
+    document.getElementById('showLog').click();
+
     // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
     // loading textures. That is handled separately by PolygonBatcher.
     canvas = $("canvas")[0];
