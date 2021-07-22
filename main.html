@@ -77,6 +77,25 @@
         </div>
     </div>
 
+    <div class="modal fade" id="divThanks" tabindex="-1" role="dialog" aria-labelledby="divThanksLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divThanksLabel">特別感謝</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divModalBody">
+                    TWY 木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid d-flex p-0">
         <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark w-25 min-vh-100 d-inline-block" id="divSidebar">
             <span>Idol:</span>
@@ -90,10 +109,12 @@
 
             <span>Background Color:</span>
             <input type="color" class="mb-3 form-input w-100" id="color-picker" />
-            <input type="button" class="mb-3 form-input w-100 pt-2 pb-2 btn-info" onclick="ClearTrack();"
+            <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2" onclick="ClearTrack();"
                 value="Reset Animation">
 
-            <input type="button" class="btn btn-primary" id="showLog" data-toggle="modal" data-target="#divUpdateLog" value="update log">
+            <input type="button" class="btn btn-primary mb-3" id="showLog" data-toggle="modal" data-target="#divUpdateLog" value="update log">
+            <input type="button" class="btn btn-success" id="showThanks" data-toggle="modal" data-target="#divThanks" value="Special Thanks">
+
         </div>
         <canvas id="canvas" class="flex-column p-0 w-75 d-inline-block min-vh-100"></canvas>
 
