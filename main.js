@@ -231,7 +231,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     try {
         animationState.setAnimation(0, initialAnimation, true);
     } catch (e) {
-        animationState.setAnimation(0, "talk_wait", true); // 하즈키 SD 관련 수정
+        animationState.setAnimation(0, Object.keys(jsonData.animations)[0], true); // 하즈키 SD 관련 수정
     }
 
     if (debug) {
