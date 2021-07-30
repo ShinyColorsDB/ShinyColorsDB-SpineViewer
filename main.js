@@ -1,20 +1,18 @@
 let lastFrameTime = Date.now() / 1000;
-let canvas;
-let shader;
-let batcher;
-let WebGL;
+let WebGL, canvas;
 const mvp = new spine.webgl.Matrix4();
-let assetManager;
-let skeletonRenderer;
-let shapes;
+let spineObject = new Array();
 
 let pathJSON = null;
 let pathAtlas = null;
 let pathTexture = null;
 
-let asset = null;
+const e = "https://static.shinycolors.moe/spines/mei/44408dc4-0f35-41a3-af58-576f2b87a6d0/big_cloth1/data";
+const exp = "https://static.shinycolors.moe/spines/asahi/d84e7f7c-7401-4c6b-9357-7b3d0e54a5ff/big_cloth1/data";
+const exp2 = "https://static.shinycolors.moe/spines/fuyuko/fffaf491-163c-4350-b004-cc2e06fdd3bf/big_cloth1/data";
 
-let idolDir;
+let asset = new Array();
+let link = [e, exp, exp2], cardName = ["【シャッターチャンス！？】和泉愛依", "【不機嫌なテーマパーク】芹沢あさひ", "【starring F】黛冬優子"];
 
 let idolInfo = null,
     idolID = null,
@@ -22,6 +20,7 @@ let idolInfo = null,
 let dressInfo = null,
     dressID = null,
     dressType = null;
+let cn = null;
 const BIG0 = "big_cloth0",
     BIG1 = "big_cloth1",
     SML0 = "sml_cloth0",
@@ -49,15 +48,15 @@ async function Init() {
             divContent.appendChild(span);
             divContent.appendChild(document.createElement("br"));
         });
-        
-        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date.substr(0,10))));
+
+        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date.substr(0, 10))));
         modal.appendChild(divContent);
     });
     document.getElementById('showLog').click();
 
     // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
     // loading textures. That is handled separately by PolygonBatcher.
-    canvas = $("canvas")[0];
+    canvas = document.getElementById("big_canvas");
 
     const config = { alpha: false };
     WebGL = canvas.getContext("webgl", config) || canvas.getContext("experimental-webgl", config);
@@ -65,15 +64,10 @@ async function Init() {
         alert("WebGL");
         return;
     }
-
     mvp.ortho2d(0, 0, canvas.width - 1, canvas.height - 1);
 
     // Create a simple shader, mesh, model-view-projection matrix and SkeletonRenderer.
-    skeletonRenderer = new spine.webgl.SkeletonRenderer(WebGL, false);
-    assetManager = new spine.webgl.AssetManager(WebGL);
-    batcher = new spine.webgl.PolygonBatcher(WebGL, false);
-    shapes = new spine.webgl.ShapeRenderer(WebGL);
-    shader = spine.webgl.Shader.newColoredTextured(WebGL);
+    for (let k = 0; k < link.length; k++) { createNewObject(link[k], cardName[k]); }
 
     if (!idolInfo) {
         idolInfo = (await axios.get("https://api.shinycolors.moe/spines/idolList")).data;
@@ -162,53 +156,57 @@ function LoadAsset() {
     // Tell AssetManager to load the resources for each model, including the exported .json file, the .atlas file and the .png
     // file for the atlas. We then wait until all resources are loaded in the load() method.
 
-    asset = null;
-
-    assetManager.removeAll();
-
-    //const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"].join("/");
-    const path = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
-    assetManager.loadText(pathJSON || path + ".json");
-    assetManager.loadText(pathAtlas || path + ".atlas");
-    assetManager.loadTexture(pathTexture || path + ".png");
+    for (let z = 0; z < spineObject.length; z++) {
+        spineObject[z].asset = null;
+        spineObject[z].assetManager.removeAll();
+        spineObject[z].assetManager.loadText(spineObject[z].link + ".json");
+        spineObject[z].assetManager.loadText(spineObject[z].link + ".atlas");
+        spineObject[z].assetManager.loadTexture(spineObject[z].link + ".png");
+    }
 
     requestAnimationFrame(Load);
 }
 
+function LoadingComplete() {
+    for (let k = 0; k < spineObject.length; k++) {
+        if (!spineObject[k].assetManager.isLoadingComplete()) return false;
+    }
+    return true;
+}
+
 function Load() {
     // Wait until the AssetManager has loaded all resources, then load the skeletons.
-    if (assetManager.isLoadingComplete()) {
-        asset = LoadSpine("wait", false);
-
+    if (!LoadingComplete()) {
+        requestAnimationFrame(Load);
+    }
+    else {
+        for (let k = 0; k < spineObject.length; k++) {
+            spineObject[k].asset = LoadSpine("wait", false, spineObject[k].link, k)
+        }
         SetupAnimationList();
 
         requestAnimationFrame(Render);
-    } else {
-        requestAnimationFrame(Load);
     }
 }
 
-function LoadSpine(initialAnimation, premultipliedAlpha) {
+function LoadSpine(initialAnimation, premultipliedAlpha, url, s) {
     // Load the texture atlas using name.atlas and name.png from the AssetManager.
     // The function passed to TextureAtlas is used to resolve relative paths.
     //const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"];
-    const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"];
-    const filePath = fileArray.join("/");
-    const subPath = fileArray.slice(0, 4).join("/");
-    console.log(filePath);
+    console.log("In LoadSpine", url);
 
-    atlas = new spine.TextureAtlas(assetManager.get(pathAtlas || filePath + ".atlas"), (path) => {
-        return assetManager.get(pathTexture || [subPath, path].join("/"));
+    let atlas = new spine.TextureAtlas(spineObject[s].assetManager.get(url + ".atlas"), (path) => {
+        return spineObject[s].assetManager.get(url + ".png");
     });
 
     // Create a AtlasAttachmentLoader that resolves region, mesh, boundingbox and path attachments
-    atlasLoader = new spine.AtlasAttachmentLoader(atlas);
+    let atlasLoader = new spine.AtlasAttachmentLoader(atlas);
 
     // Create a SkeletonJson instance for parsing the .json file.
     const skeletonJson = new spine.SkeletonJson(atlasLoader);
 
     // 
-    const jsonData = JSON.parse(assetManager.get(pathJSON || filePath + ".json"));
+    const jsonData = JSON.parse(spineObject[s].assetManager.get(url + ".json"));
     jsonData.slots.forEach((item) => {
         if (item.blend && item.name !== "eye_shadow_L") {
             delete item.blend;
@@ -220,7 +218,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
     const skeleton = new spine.Skeleton(skeletonData);
     try {
         skeleton.setSkinByName("normal");
-    } catch (e) {}
+    } catch (e) { }
 
     // Create an AnimationState, and set the initial animation in looping mode.
     animationStateData = new spine.AnimationStateData(skeleton.data);
@@ -236,22 +234,22 @@ function LoadSpine(initialAnimation, premultipliedAlpha) {
 
     if (debug) {
         animationState.addListener({
-            start: function(track) {
+            start: function (track) {
                 console.log("Animation on track " + track.trackIndex + " started");
             },
-            interrupt: function(track) {
+            interrupt: function (track) {
                 console.log("Animation on track " + track.trackIndex + " interrupted");
             },
-            end: function(track) {
+            end: function (track) {
                 console.log("Animation on track " + track.trackIndex + " ended");
             },
-            disposed: function(track) {
+            disposed: function (track) {
                 console.log("Animation on track " + track.trackIndex + " disposed");
             },
-            complete: function(track) {
+            complete: function (track) {
                 console.log("Animation on track " + track.trackIndex + " completed");
             },
-            event: function(track, event) {
+            event: function (track, event) {
                 console.log("Event on track " + track.trackIndex + ": " + JSON.stringify(event));
             },
         });
@@ -275,6 +273,7 @@ function CalculateBounds(skeleton) {
     let offset = new spine.Vector2();
     let size = new spine.Vector2();
     skeleton.getBounds(offset, size, []);
+    //console.log(offset, size)
     return { offset: offset, size: size };
 }
 
@@ -300,7 +299,6 @@ function SetupIdolList() {
         SetupDressList();
         SetupTypeList();
         ClearDragStatus();
-        requestAnimationFrame(LoadAsset);
     };
 }
 
@@ -327,10 +325,10 @@ async function SetupDressList() {
 
     dressList.onchange = () => {
         dressID = dressList.value;
+        cn = dressList.options[dressList.selectedIndex].text;
         console.log(dressList.value);
         SetupTypeList();
         ClearDragStatus();
-        requestAnimationFrame(LoadAsset);
     };
 
     SetupTypeList();
@@ -388,7 +386,6 @@ function SetupTypeList() {
     typeList.onchange = () => {
         dressType = typeList.value;
         ClearDragStatus();
-        requestAnimationFrame(LoadAsset);
     };
 
     //console.log(dressInfo[dressID]);
@@ -396,8 +393,8 @@ function SetupTypeList() {
 
 function SetupAnimationList() {
     const animationList = $("#animationList")[0];
-    const skeleton = asset.skeleton;
-    const state = asset.state;
+    const skeleton = spineObject[0].asset.skeleton;
+    const state = spineObject[0].asset.state;
     const activeAnimation = state.tracks[0].animation.name;
 
     animationList.innerHTML = "";
@@ -412,8 +409,8 @@ function SetupAnimationList() {
     }
 
     animationList.onchange = () => {
-        const state = asset.state;
-        const skeleton = asset.skeleton;
+        const state = asset[0].state;
+        const skeleton = asset[0].skeleton;
         const animationName = animationList.value;
         ClearTrack();
         skeleton.setToSetupPose();
@@ -436,16 +433,16 @@ function SetupAnimationList() {
 }
 
 function ClearTrack() {
-    if (asset) {
-        asset.state.clearTrack(1);
-        asset.state.clearTrack(2);
-        asset.state.clearTrack(3);
+    if (spineObject[0].asset) {
+        spineObject[0].asset.state.clearTrack(1);
+        spineObject[0].asset.state.clearTrack(2);
+        spineObject[0].asset.state.clearTrack(3);
     }
 }
 
 function SetupSkinList() {
     const skinList = $("#skinList")[0];
-    const skeleton = asset.skeleton;
+    const skeleton = spineObject[0].asset.skeleton;
     const activeSkin = skeleton.skin == null ? "default" : skeleton.skin.name;
 
     skinList.innerHTML = "";
@@ -460,7 +457,7 @@ function SetupSkinList() {
     }
 
     skinList.onchange = () => {
-        const skeleton = asset.skeleton;
+        const skeleton = spineObject[0].asset.skeleton;
         const skinName = skinList.value;
         skeleton.setSkinByName(skinName);
         skeleton.setSlotsToSetupPose();
@@ -468,6 +465,7 @@ function SetupSkinList() {
 }
 
 function Render() {
+    //console.log(index)
     let now = Date.now() / 1000;
     let delta = now - lastFrameTime;
     lastFrameTime = now;
@@ -475,59 +473,114 @@ function Render() {
     // 배경 그리기
     WebGL.clearColor(...backgroundColor, 1);
     WebGL.clear(WebGL.COLOR_BUFFER_BIT);
+    let k = [-400, 0, 400, -800, 800];
+    for (let z = 0; z < spineObject.length; z++) {
+        if (spineObject[z].asset === null) {
+            return;
+        }
 
-    // 애셋이 없으면 여기서 마무리
-    if (asset === null) {
-        return;
+        // Update the MVP matrix to adjust for canvas size changes
+        Resize(z, k[z]);
+        // Apply the animation state based on the delta time.
+        let state = spineObject[z].asset.state;
+        let skeleton = spineObject[z].asset.skeleton;
+        let premultipliedAlpha = spineObject[z].asset.premultipliedAlpha;
+        state.update(delta);
+        state.apply(skeleton);
+        skeleton.updateWorldTransform();
+
+        // Bind the shader and set the texture and model-view-projection matrix.
+        spineObject[z].shader.bind();
+        spineObject[z].shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
+        spineObject[z].shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, mvp.values);
+
+        // Start the batch and tell the SkeletonRenderer to render the active skeleton.
+        spineObject[z].batcher.begin(spineObject[z].shader);
+        spineObject[z].skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
+        spineObject[z].skeletonRenderer.draw(spineObject[z].batcher, skeleton);
+        spineObject[z].batcher.end();
+        spineObject[z].shader.unbind();
     }
-
-    // Update the MVP matrix to adjust for canvas size changes
-    Resize();
-
-    // Apply the animation state based on the delta time.
-    let state = asset.state;
-    let skeleton = asset.skeleton;
-    let premultipliedAlpha = asset.premultipliedAlpha;
-    state.update(delta);
-    state.apply(skeleton);
-    skeleton.updateWorldTransform();
-
-    // Bind the shader and set the texture and model-view-projection matrix.
-    shader.bind();
-    shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
-    shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, mvp.values);
-
-    // Start the batch and tell the SkeletonRenderer to render the active skeleton.
-    batcher.begin(shader);
-    skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
-    skeletonRenderer.draw(batcher, skeleton);
-    batcher.end();
-    shader.unbind();
 
     requestAnimationFrame(Render);
 }
 
-function Resize() {
+function Resize(ind, x) {
     let w = canvas.clientWidth;
     let h = canvas.clientHeight;
-    let bounds = asset.bounds;
+    let bounds = spineObject[ind].asset.bounds;
     if (canvas.width != w || canvas.height != h) {
         canvas.width = w;
         canvas.height = h;
     }
 
     // magic
-    let centerX = bounds.offset.x + bounds.size.x / 2;
+    //let centerX = bounds.offset.x + bounds.size.x / 2;
+    let centerX = x;
     let centerY = bounds.offset.y + bounds.size.y / 2;
     let scaleX = bounds.size.x / canvas.width;
     let scaleY = bounds.size.y / canvas.height;
     let scale = Math.max(scaleX, scaleY) * 1.2;
     if (scale < 1) scale = 1;
-    let width = canvas.width * scale;
+    let width = canvas.width * scale;  // higher the scale, smaller the character
     let height = canvas.height * scale;
-
-    mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);
+    mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);  // change centerX to change render location
     WebGL.viewport(0, 0, canvas.width, canvas.height);
 }
 
-//Init();
+function AddToActiveList() {
+    let newPath = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
+
+    createNewObject(newPath, cn);
+
+    BuildActiveList();
+    
+    LoadAsset();
+}
+//<a href="javascript:void(0)"><span class="badge badge-pill badge-primary ml-2">&times;</span></a>
+function createNewObject(spineLink, nm) {
+    spineObject.push({
+        name: nm,
+        link: spineLink,
+        skeletonRenderer: new spine.webgl.SkeletonRenderer(WebGL, false),
+        assetManager: new spine.webgl.AssetManager(WebGL),
+        asset: null,
+        batcher: new spine.webgl.PolygonBatcher(WebGL, false),
+        shader: spine.webgl.Shader.newColoredTextured(WebGL),
+        coordinateX: 0,
+        coordinateY: 0
+    });
+}
+
+function DeleteSpineObject(e) {
+    spineObject = spineObject.filter((element, index) => {
+        return index != e ? element : false;
+    });
+    BuildActiveList();
+}
+
+function BuildActiveList() {
+    const spineList = document.getElementById("activeSpine");
+    spineList.innerHTML = "";
+
+    for (let k in spineObject) {
+        CreateActiveListElement(spineList, k);
+    }
+}
+
+function CreateActiveListElement(list, k) {
+    const li = document.createElement("li");
+    li.classList.add("dropdown-item", "ps-2", "pe-1");
+    li.appendChild(document.createTextNode(spineObject[k].name));
+    const button = document.createElement("button");
+    button.onclick = function () {
+        DeleteSpineObject(k);
+    }
+    button.classList.add("btn");
+    const span = document.createElement("span");
+    span.classList.add("badge", "badge-pill", "badge-primary", "ml-2");
+    span.innerHTML = "&times;";
+    button.appendChild(span);
+    li.appendChild(button);
+    list.appendChild(li);
+}
