@@ -1,0 +1,19 @@
+* {
+    font-family: Meiryo, Arial, Helvetica, sans-serif;
+}
+
+div span {
+    color: #fff;
+    padding: 4px;
+}
+
+.form-select {
+    padding: .5rem 2.25rem .375rem 1rem;
+    border-radius: .4rem;
+    box-shadow: 0 0 3pt 2pt #0e3155;
+    outline: none;
+}
+
+select:focus {
+    box-shadow: 0 0 3pt 2pt #569ce2;
+}

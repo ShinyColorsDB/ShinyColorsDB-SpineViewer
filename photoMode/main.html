@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../spine.js"></script>
+
+    <!-- Cloudflare Web Analytics >
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+        data-cf-beacon='{"token": "3e38e18902dc4c00ad682d502f7f8b3c"}'></script>
+    < End Cloudflare Web Analytics -->
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>ShinyColors 戳戳樂~~</title>
+    <meta name="title" content="ShinyColors Spine Viewer (Or Live2d?)">
+    <meta name="description" content="A fan made website that renders live2d for each card.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://spine.shinycolors.moe/photoMode">
+    <meta property="og:title" content="ShinyColors Spine Viewer">
+    <meta property="og:description" content="A fan made website that renders live2d for each card.">
+    <meta property="og:image" content="https://spine.shinycolors.moe/photoMode/preview.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://spine.shinycolors.moe/photoMode">
+    <meta property="twitter:title" content="ShinyColors Spine Viewer">
+    <meta property="twitter:description" content="A fan made website that renders live2d for each card.">
+    <meta property="twitter:image" content="https://spine.shinycolors.moe/photoMode/preview.jpg">
+
+    <script src="./main.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+
+</head>
+
+<body ondrop="DropHandler(event);" ondragover="DragOverHandler(event);" onload="Init();">
+    <div class="d-none">
+        SC戳戳樂~ 這邊網羅了大部分角色的衣服，就算你沒有那張卡也能舔老婆~ shinycolors spine viewer, shinycolors live2d veiwer, 偶像大師閃耀色彩 live2d 資料網,
+        偶像大師 閃耀色彩, 偶閃, spine, live2d, シャニーマス, アイドルマスタシャニカラーズ
+    </div>
+
+    <div class="modal fade" id="divUpdateLog" tabindex="-1" role="dialog" aria-labelledby="divUpdateLogLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divUpdateLogLabel">更新日誌</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divModalBody">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="divThanks" tabindex="-1" role="dialog" aria-labelledby="divThanksLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divThanksLabel">特別感謝</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divModalBody">
+                    TWY 木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="divCoordinate" tabindex="2" aria-labelledby="divCoordinateLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divCoordinateLabel">參數</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <span class="input-group-text" id="iptCoordXDesc">Ｘ座標</span>
+                        <input type="number" class="form-control" id="iptShiftX" placeholder="Ｘ座標"
+                            aria-describedby="iptCoordXDesc" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text" id="iptCoordYDesc">Ｙ座標</span>
+                        <input type="number" class="form-control" id="iptShiftY" placeholder="Ｙ座標"
+                            aria-describedby="iptCoordYDesc" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text" id="iptScaleDesc">スケール</span>
+                        <input type="number" class="form-control" id="iptScale" placeholder="スケール"
+                            aria-describedby="iptScaleDesc" value="1.2"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    <button type="button" class="btn btn-primary" onclick="AddToActiveList();"
+                        data-bs-dismiss="modal">確認</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="divPreview" tabindex="2" aria-labelledby="divPreviewLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divPreviewLabel">プレビュー</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="sml_canvas"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-secondary">
+        <div class="container-fluid">
+            <span>ShinyColorsDB-SpineViewer</span>
+            <button class="btn btn-info" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu"
+                aria-controls="offcanvasMenu">メニュー</button>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-end p-0 d-flex container-fluid ofs" id="offcanvasMenu" aria-labelledby="offcanvas"
+        tabindex="1">
+        <div class="offcanvas-body bg-secondary d-inline-block d-flex flex-column">
+            <span class="mt-2">アイドル:</span>
+            <select id="idolList" class="form-select" aria-label="Default select example"></select>
+            <span class="mt-2">ドレス:</span>
+            <select id="dressList" class="form-select" aria-label="Default select example"></select>
+            <span class="mt-2">タイプ:</span>
+            <select id="typeList" class="form-select" aria-label="Default select example"></select>
+            <span class="mt-2">アニメーション:</span>
+            <select id="animationList" class="form-select" aria-label="Default select example"></select>
+
+            <span>Background Color:</span>
+            <input type="color" class="mb-3 form-control w-100 ml-0" id="color-picker" />
+
+            <button class="btn btn-primary mb-3 w-100" onclick="document.getElementById('closeOffCanvas').click()"
+                data-bs-toggle="modal" data-bs-target="#divCoordinate">
+                Add To Canvas
+            </button>
+            <button class="d-none" id="closeOffCanvas" data-bs-target="#offcanvasMenu" data-bs-toggle="offcanvas">
+
+            </button>
+
+            <button class="btn btn-success mb-3 w-100" id="showLog" data-bs-toggle="modal"
+                data-bs-target="#divUpdateLog">Update Log</button>
+            <button class="btn btn-success w-100" id="showThanks" data-bs-toggle="modal"
+                data-bs-target="#divThanks">Special Thanks</button>
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-start p-0 d-flex container-fluid ofs" id="offcanvasMenu2" aria-labelledby="offcanvas"
+        tabindex="1">
+        <canvas class="d-inline-block h-100 flex-column" id="sml_canvas"></canvas>
+    </div>
+
+    <canvas id="big_canvas" class="flex-column p-0 w-100 h-100"></canvas>
+
+    <nav class="navbar navbar-expand-lg fixed-bottom bg-secondary">
+        <div class="dropup">
+            <button class="btn btn-secondary dropdown-toggle" role="button" id="dropdownSpine" data-bs-toggle="dropdown"
+                aria-expanded="false">Active Spine</button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownSpine" id="activeSpine">
+                
+            </ul>
+        </div>
+    </nav>
+</body>
+
+</html>

@@ -12,11 +12,11 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./style.css" />
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!--script src="https://esotericsoftware.com/files/runtimes/spine-ts/build/spine-webgl.js"></script-->
-    <script src="https://spine.shinycolors.moe/spine.js"></script>
+    <script src="../spine.js"></script>
     <!-- Primary Meta Tags -->
     <title>ShinyColors 戳戳樂~~</title>
     <meta name="title" content="ShinyColors Spine Viewer (Or Live2d?)">
@@ -24,19 +24,19 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://spine.shinycolors.moe">
+    <meta property="og:url" content="https://spine.shinycolors.moe/viewMode">
     <meta property="og:title" content="ShinyColors Spine Viewer">
     <meta property="og:description"
         content="A fan made website that renders live2d for each card.">
-    <meta property="og:image" content="https://spine.shinycolors.moe/hazuki.jpg">
+    <meta property="og:image" content="https://spine.shinycolors.moe/viewMode/hazuki.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://spine.shinycolors.moe">
+    <meta property="twitter:url" content="https://spine.shinycolors.moe/viewMode">
     <meta property="twitter:title" content="ShinyColors Spine Viewer">
     <meta property="twitter:description"
         content="A fan made website that renders live2d for each card.">
-    <meta property="twitter:image" content="https://spine.shinycolors.moe/hazuki.jpg">
+    <meta property="twitter:image" content="https://spine.shinycolors.moe/viewMode/hazuki.jpg">
 
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
         integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
@@ -48,7 +48,7 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
 
-    <script src="main.js"></script>
+    <script src="./main.js"></script>
 
     <script>
         
@@ -113,8 +113,8 @@
 
             <span>Background Color:</span>
             <input type="color" class="mb-3 form-input w-100" id="color-picker" />
-            <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2" onclick="ClearTrack();"
-                value="Reset Animation">
+            <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2" onclick="location.href = '../photoMode'"
+                value="PhotoMode">
 
             <input type="button" class="btn btn-primary mb-3" id="showLog" data-toggle="modal" data-target="#divUpdateLog" value="update log">
             <input type="button" class="btn btn-success" id="showThanks" data-toggle="modal" data-target="#divThanks" value="Special Thanks">
