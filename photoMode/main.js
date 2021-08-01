@@ -34,6 +34,9 @@ const $ = document.querySelectorAll.bind(document);
 
 async function Init() {
     UpdateLog();
+
+    document.getElementById("iptShiftX").placeholder = `X座標、推奨±${Math.round(window.innerWidth/ 2 / 100) * 100}`;
+    document.getElementById("iptShiftY").placeholder = `Y座標、推奨±${Math.round(window.innerHeight/ 2 / 100) * 100}`;
     // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
     // loading textures. That is handled separately by PolygonBatcher.
     canvas = document.getElementById("big_canvas");
@@ -526,13 +529,13 @@ function Resize(e) {
 
     // magic
     //let centerX = bounds.offset.x + bounds.size.x / 2;
-    let centerX = (bounds.offset.x + bounds.size.x / 2) + e.shiftX;
-    let centerY = (bounds.offset.y + bounds.size.y / 2) + e.shiftY;
+    let centerX = (bounds.offset.x + bounds.size.x / 2) - e.shiftX;
+    let centerY = (bounds.offset.y + bounds.size.y / 2) - e.shiftY;
     let scaleX = bounds.size.x / canvas.width;
     let scaleY = bounds.size.y / canvas.height;
-    let scale = Math.max(scaleX, scaleY) * e.scale;
+    let scale = Math.max(scaleX, scaleY) / e.scale;
     if (scale < 1) scale = 1;
-    let width = canvas.width * scale;  // higher the scale, smaller the character
+    let width = canvas.width * scale;  // higher the scale, bigger the character
     let height = canvas.height * scale;
     mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);  // change centerX to change render location
     WebGL.viewport(0, 0, canvas.width, canvas.height);
@@ -544,14 +547,14 @@ function AddToActiveList() {
         shiftY = Number(document.getElementById("iptShiftY").value),
         scale  = Number(document.getElementById("iptScale").value);
 
-    scale = scale == 0 ? 1.2 : scale;
+    scale = scale == 0 ? 0.8 : scale;
     if(isNaN(shiftX) || isNaN(shiftY) || isNaN(scale)) {
         alert("Please Input Numbers.");
     }
 
     document.getElementById("iptShiftX").value = '';
     document.getElementById("iptShiftY").value = '';
-    document.getElementById("iptScale").value = 1.2;
+    document.getElementById("iptScale").value = 0.8;
 
     CreateNewObject(newPath, cn, shiftX, shiftY, scale);
     BuildActiveList();
@@ -559,7 +562,7 @@ function AddToActiveList() {
     LoadAsset();
 }
 //<a href="javascript:void(0)"><span class="badge badge-pill badge-primary ml-2">&times;</span></a>
-function CreateNewObject(spineLink, nm, x = 0, y = 0, scale = 1.2) {
+function CreateNewObject(spineLink, nm, x = 0, y = 0, scale = 0.8) {
     spineObject.push({
         name: nm,
         link: spineLink,
@@ -592,7 +595,7 @@ function BuildActiveList() {
 
 function CreateActiveListElement(list, k) {
     const li = document.createElement("li");
-    li.classList.add("dropdown-item", "ps-2", "pe-1");
+    li.classList.add("dropdown-item", "ps-2", "pe-1", "btn");
     li.appendChild(document.createTextNode(spineObject[k].name));
     const button = document.createElement("button");
     button.onclick = function () {
