@@ -7,9 +7,9 @@ let pathJSON = null;
 let pathAtlas = null;
 let pathTexture = null;
 
-const e = "https://static.shinycolors.moe/spines/mei/44408dc4-0f35-41a3-af58-576f2b87a6d0/big_cloth1/data";
-const exp = "https://static.shinycolors.moe/spines/asahi/d84e7f7c-7401-4c6b-9357-7b3d0e54a5ff/big_cloth1/data";
-const exp2 = "https://static.shinycolors.moe/spines/fuyuko/fffaf491-163c-4350-b004-cc2e06fdd3bf/big_cloth1/data";
+const e = "https://static.shinycolors.moe/spines/mei/04fd22ed-d080-4f46-914d-40d58a72f600/big_cloth1/data";
+const exp = "https://static.shinycolors.moe/spines/asahi/8d0ce50a-8ac1-43fa-855d-3331decf9583/big_cloth1/data";
+const exp2 = "https://static.shinycolors.moe/spines/fuyuko/c203ce95-86c3-446e-80a0-600fe49cd5eb/big_cloth1/data";
 
 let asset = new Array();
 let link = [e, exp, exp2], cardName = ["【シャッターチャンス！？】和泉愛依", "【不機嫌なテーマパーク】芹沢あさひ", "【starring F】黛冬優子"];
@@ -33,6 +33,46 @@ const dataURL = "https://static.shinycolors.moe/spines";
 const $ = document.querySelectorAll.bind(document);
 
 async function Init() {
+    UpdateLog();
+    // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
+    // loading textures. That is handled separately by PolygonBatcher.
+    canvas = document.getElementById("big_canvas");
+
+    const config = { alpha: false };
+    WebGL = canvas.getContext("webgl", config) || canvas.getContext("experimental-webgl", config);
+    if (!WebGL) {
+        alert("WebGL");
+        return;
+    }
+    mvp.ortho2d(0, 0, canvas.width - 1, canvas.height - 1);
+
+    // Create a simple shader, mesh, model-view-projection matrix and SkeletonRenderer.
+    let g = -400;
+    for (let k = 0; k < link.length; k++) { 
+        CreateNewObject(link[k], cardName[k], g); 
+        g += 400;
+    }
+
+    if (!idolInfo) {
+        idolInfo = (await axios.get("https://api.shinycolors.moe/spines/idolList")).data;
+        //console.log(idolInfo);
+        localStorage.setItem("idolInfo", JSON.stringify(idolInfo));
+    }
+
+    const colorPicker = document.querySelector("#color-picker");
+    colorPicker.onchange = (event) => {
+        backgroundColor = HexToRgb(event.target.value);
+    };
+    BuildActiveList();
+
+    SetupIdolList();
+    SetupDressList();
+    SetupTypeList();
+
+    LoadAsset();
+}
+
+async function UpdateLog() {
     let modal = document.getElementById("divModalBody");
     let updateInfo = (await axios.get("https://api.shinycolors.moe/spines/updateLog")).data;
     updateInfo.forEach(element => {
@@ -53,38 +93,6 @@ async function Init() {
         modal.appendChild(divContent);
     });
     document.getElementById('showLog').click();
-
-    // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
-    // loading textures. That is handled separately by PolygonBatcher.
-    canvas = document.getElementById("big_canvas");
-
-    const config = { alpha: false };
-    WebGL = canvas.getContext("webgl", config) || canvas.getContext("experimental-webgl", config);
-    if (!WebGL) {
-        alert("WebGL");
-        return;
-    }
-    mvp.ortho2d(0, 0, canvas.width - 1, canvas.height - 1);
-
-    // Create a simple shader, mesh, model-view-projection matrix and SkeletonRenderer.
-    for (let k = 0; k < link.length; k++) { createNewObject(link[k], cardName[k]); }
-
-    if (!idolInfo) {
-        idolInfo = (await axios.get("https://api.shinycolors.moe/spines/idolList")).data;
-        //console.log(idolInfo);
-        localStorage.setItem("idolInfo", JSON.stringify(idolInfo));
-    }
-
-    const colorPicker = document.querySelector("#color-picker");
-    colorPicker.onchange = (event) => {
-        backgroundColor = HexToRgb(event.target.value);
-    };
-
-    SetupIdolList();
-    SetupDressList();
-    SetupTypeList();
-
-    LoadAsset();
 }
 
 function HexToRgb(hex) {
@@ -156,20 +164,20 @@ function LoadAsset() {
     // Tell AssetManager to load the resources for each model, including the exported .json file, the .atlas file and the .png
     // file for the atlas. We then wait until all resources are loaded in the load() method.
 
-    for (let z = 0; z < spineObject.length; z++) {
-        spineObject[z].asset = null;
-        spineObject[z].assetManager.removeAll();
-        spineObject[z].assetManager.loadText(spineObject[z].link + ".json");
-        spineObject[z].assetManager.loadText(spineObject[z].link + ".atlas");
-        spineObject[z].assetManager.loadTexture(spineObject[z].link + ".png");
+    for (let z of spineObject) {
+        z.asset = null;
+        z.assetManager.removeAll();
+        z.assetManager.loadText(z.link + ".json");
+        z.assetManager.loadText(z.link + ".atlas");
+        z.assetManager.loadTexture(z.link + ".png");
     }
 
     requestAnimationFrame(Load);
 }
 
 function LoadingComplete() {
-    for (let k = 0; k < spineObject.length; k++) {
-        if (!spineObject[k].assetManager.isLoadingComplete()) return false;
+    for (let z of spineObject) {
+        if (!z.assetManager.isLoadingComplete()) return false;
     }
     return true;
 }
@@ -180,8 +188,11 @@ function Load() {
         requestAnimationFrame(Load);
     }
     else {
-        for (let k = 0; k < spineObject.length; k++) {
-            spineObject[k].asset = LoadSpine("wait", false, spineObject[k].link, k)
+        //for (let k = 0; k < spineObject.length; k++) {
+        //    spineObject[k].asset = LoadSpine("wait", false, spineObject[k].link, k)
+        //}
+        for (let z of spineObject) {
+            z.asset = LoadSpine("wait", false, z);
         }
         SetupAnimationList();
 
@@ -189,14 +200,14 @@ function Load() {
     }
 }
 
-function LoadSpine(initialAnimation, premultipliedAlpha, url, s) {
+function LoadSpine(initialAnimation, premultipliedAlpha, z) {
     // Load the texture atlas using name.atlas and name.png from the AssetManager.
     // The function passed to TextureAtlas is used to resolve relative paths.
     //const fileArray = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressName, dressType, "data"];
-    console.log("In LoadSpine", url);
+    console.log("In LoadSpine", z.link);
 
-    let atlas = new spine.TextureAtlas(spineObject[s].assetManager.get(url + ".atlas"), (path) => {
-        return spineObject[s].assetManager.get(url + ".png");
+    let atlas = new spine.TextureAtlas(z.assetManager.get(z.link + ".atlas"), (path) => {
+        return z.assetManager.get(z.link + ".png");
     });
 
     // Create a AtlasAttachmentLoader that resolves region, mesh, boundingbox and path attachments
@@ -206,7 +217,7 @@ function LoadSpine(initialAnimation, premultipliedAlpha, url, s) {
     const skeletonJson = new spine.SkeletonJson(atlasLoader);
 
     // 
-    const jsonData = JSON.parse(spineObject[s].assetManager.get(url + ".json"));
+    const jsonData = JSON.parse(z.assetManager.get(z.link + ".json"));
     jsonData.slots.forEach((item) => {
         if (item.blend && item.name !== "eye_shadow_L") {
             delete item.blend;
@@ -309,7 +320,7 @@ async function SetupDressList() {
     dressInfo = (await axios.get(`https://api.shinycolors.moe/spines/dressList/${idolID}`)).data;
     //console.log(dressInfo);
     let flag = false;
-
+    cn = dressInfo[0].DressName;
     dressInfo.forEach((element, index) => {
         if (element.Exist && !flag) {
             flag = true;
@@ -473,42 +484,41 @@ function Render() {
     // 배경 그리기
     WebGL.clearColor(...backgroundColor, 1);
     WebGL.clear(WebGL.COLOR_BUFFER_BIT);
-    let k = [-400, 0, 400, -800, 800];
-    for (let z = 0; z < spineObject.length; z++) {
-        if (spineObject[z].asset === null) {
+    for (let z of spineObject) {
+        if (z.asset === null) {
             return;
         }
 
         // Update the MVP matrix to adjust for canvas size changes
-        Resize(z, k[z]);
+        Resize(z);
         // Apply the animation state based on the delta time.
-        let state = spineObject[z].asset.state;
-        let skeleton = spineObject[z].asset.skeleton;
-        let premultipliedAlpha = spineObject[z].asset.premultipliedAlpha;
+        let state = z.asset.state;
+        let skeleton = z.asset.skeleton;
+        let premultipliedAlpha = z.asset.premultipliedAlpha;
         state.update(delta);
         state.apply(skeleton);
         skeleton.updateWorldTransform();
 
         // Bind the shader and set the texture and model-view-projection matrix.
-        spineObject[z].shader.bind();
-        spineObject[z].shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
-        spineObject[z].shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, mvp.values);
+        z.shader.bind();
+        z.shader.setUniformi(spine.webgl.Shader.SAMPLER, 0);
+        z.shader.setUniform4x4f(spine.webgl.Shader.MVP_MATRIX, mvp.values);
 
         // Start the batch and tell the SkeletonRenderer to render the active skeleton.
-        spineObject[z].batcher.begin(spineObject[z].shader);
-        spineObject[z].skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
-        spineObject[z].skeletonRenderer.draw(spineObject[z].batcher, skeleton);
-        spineObject[z].batcher.end();
-        spineObject[z].shader.unbind();
+        z.batcher.begin(z.shader);
+        z.skeletonRenderer.premultipliedAlpha = premultipliedAlpha;
+        z.skeletonRenderer.draw(z.batcher, skeleton);
+        z.batcher.end();
+        z.shader.unbind();
     }
 
     requestAnimationFrame(Render);
 }
 
-function Resize(ind, x) {
+function Resize(e) {
     let w = canvas.clientWidth;
     let h = canvas.clientHeight;
-    let bounds = spineObject[ind].asset.bounds;
+    let bounds = e.asset.bounds;
     if (canvas.width != w || canvas.height != h) {
         canvas.width = w;
         canvas.height = h;
@@ -516,11 +526,11 @@ function Resize(ind, x) {
 
     // magic
     //let centerX = bounds.offset.x + bounds.size.x / 2;
-    let centerX = x;
-    let centerY = bounds.offset.y + bounds.size.y / 2;
+    let centerX = (bounds.offset.x + bounds.size.x / 2) + e.shiftX;
+    let centerY = (bounds.offset.y + bounds.size.y / 2) + e.shiftY;
     let scaleX = bounds.size.x / canvas.width;
     let scaleY = bounds.size.y / canvas.height;
-    let scale = Math.max(scaleX, scaleY) * 1.2;
+    let scale = Math.max(scaleX, scaleY) * e.scale;
     if (scale < 1) scale = 1;
     let width = canvas.width * scale;  // higher the scale, smaller the character
     let height = canvas.height * scale;
@@ -530,15 +540,26 @@ function Resize(ind, x) {
 
 function AddToActiveList() {
     let newPath = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
+    let shiftX = Number(document.getElementById("iptShiftX").value),
+        shiftY = Number(document.getElementById("iptShiftY").value),
+        scale  = Number(document.getElementById("iptScale").value);
 
-    createNewObject(newPath, cn);
+    scale = scale == 0 ? 1.2 : scale;
+    if(isNaN(shiftX) || isNaN(shiftY) || isNaN(scale)) {
+        alert("Please Input Numbers.");
+    }
 
+    document.getElementById("iptShiftX").value = '';
+    document.getElementById("iptShiftY").value = '';
+    document.getElementById("iptScale").value = 1.2;
+
+    CreateNewObject(newPath, cn, shiftX, shiftY, scale);
     BuildActiveList();
     
     LoadAsset();
 }
 //<a href="javascript:void(0)"><span class="badge badge-pill badge-primary ml-2">&times;</span></a>
-function createNewObject(spineLink, nm) {
+function CreateNewObject(spineLink, nm, x = 0, y = 0, scale = 1.2) {
     spineObject.push({
         name: nm,
         link: spineLink,
@@ -547,8 +568,9 @@ function createNewObject(spineLink, nm) {
         asset: null,
         batcher: new spine.webgl.PolygonBatcher(WebGL, false),
         shader: spine.webgl.Shader.newColoredTextured(WebGL),
-        coordinateX: 0,
-        coordinateY: 0
+        shiftX: x,
+        shiftY: y,
+        scale: scale
     });
 }
 
