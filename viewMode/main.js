@@ -395,6 +395,7 @@ function SetupTypeList() {
     typeList.onchange = () => {
         dressType = typeList.value;
         ClearDragStatus();
+        LoadAsset();
     };
 }
 
