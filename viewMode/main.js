@@ -353,19 +353,19 @@ function SetupTypeList() {
         sml0.value = SML0;
         typeList.appendChild(sml0);
     }
-    if (dressInfo[dressID].Big_Cloth0) {
-        flag_big0 = true;
-        big0 = document.createElement("option");
-        big0.textContent = "一般_通常服";
-        big0.value = BIG0;
-        typeList.appendChild(big0);
-    }
     if (dressInfo[dressID].Sml_Cloth1) {
         flag_sml0 = true;
         sml1 = document.createElement("option");
         sml1.textContent = "Q版_演出服";
         sml1.value = SML1;
         typeList.appendChild(sml1);
+    }
+    if (dressInfo[dressID].Big_Cloth0) {
+        flag_big0 = true;
+        big0 = document.createElement("option");
+        big0.textContent = "一般_通常服";
+        big0.value = BIG0;
+        typeList.appendChild(big0);
     }
     if (dressInfo[dressID].Big_Cloth1) {
         flag_big1 = true;
