@@ -338,60 +338,64 @@ async function SetupDressList() {
 }
 
 function SetupTypeList() {
+    if (!dressInfo) return;
     const typeList = $("#typeList")[0];
 
     typeList.innerHTML = "";
 
     let big0, big1, sml0, sml1;
-    let flag0 = false,
-        flag1 = false;
-    if (dressInfo[dressID]?.Dress0) {
-        big0 = document.createElement("option");
-        big0.textContent = "一般_通常服";
-        big0.value = BIG0;
-
+    let flag_sml0 = false, flag_big0 = false,
+        flag_sml1 = false, flag_big1 = false;
+    if (dressInfo[dressID].Sml_Cloth0) {
+        flag_sml0 = true;
         sml0 = document.createElement("option");
         sml0.textContent = "Q版_通常服";
         sml0.value = SML0;
-        flag0 = true;
+        typeList.appendChild(sml0);
     }
-    if (dressInfo[dressID]?.Dress1) {
-        big1 = document.createElement("option");
-        big1.textContent = "一般_演出服";
-        big1.value = BIG1;
-
+    if (dressInfo[dressID].Big_Cloth0) {
+        flag_big0 = true;
+        big0 = document.createElement("option");
+        big0.textContent = "一般_通常服";
+        big0.value = BIG0;
+        typeList.appendChild(big0);
+    }
+    if (dressInfo[dressID].Sml_Cloth1) {
+        flag_sml0 = true;
         sml1 = document.createElement("option");
         sml1.textContent = "Q版_演出服";
         sml1.value = SML1;
-        flag1 = true;
+        typeList.appendChild(sml1);
+    }
+    if (dressInfo[dressID].Big_Cloth1) {
+        flag_big1 = true;
+        big1 = document.createElement("option");
+        big1.textContent = "一般_演出服";
+        big1.value = BIG1;
+        typeList.appendChild(big1);
     }
 
-    if (flag0 && flag1) {
+    if (flag_big0) {
         dressType = BIG0;
         big0.selected = true;
-        typeList.appendChild(sml0);
-        typeList.appendChild(sml1);
-        typeList.appendChild(big0);
-        typeList.appendChild(big1);
-    } else if (flag0 && !flag1) {
-        dressType = BIG0;
-        big0.selected = true;
-        typeList.appendChild(sml0);
-        typeList.appendChild(big0);
-    } else if (!flag0 && flag1) {
+    }
+    else if (flag_big1) {
         dressType = BIG1;
         big1.selected = true;
-        typeList.appendChild(sml1);
-        typeList.appendChild(big1);
+    }
+    else if (flag_sml0) {
+        dressType = SML0;
+        sml0.selected = true;
+    }
+    else if (flag_sml1) {
+        dressType = SML1;
+        sml1.selected = true;
     }
 
     typeList.onchange = () => {
         dressType = typeList.value;
         ClearDragStatus();
-        requestAnimationFrame(LoadAsset);
     };
-
-    //console.log(dressInfo[dressID]);
 }
 
 function SetupAnimationList() {

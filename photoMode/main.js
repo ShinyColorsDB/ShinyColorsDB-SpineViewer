@@ -3,16 +3,13 @@ let WebGL, canvas;
 const mvp = new spine.webgl.Matrix4();
 let spineObject = new Array();
 
-let pathJSON = null;
-let pathAtlas = null;
-let pathTexture = null;
-
 const e = "https://static.shinycolors.moe/spines/mei/04fd22ed-d080-4f46-914d-40d58a72f600/big_cloth1/data";
 const exp = "https://static.shinycolors.moe/spines/asahi/8d0ce50a-8ac1-43fa-855d-3331decf9583/big_cloth1/data";
 const exp2 = "https://static.shinycolors.moe/spines/fuyuko/c203ce95-86c3-446e-80a0-600fe49cd5eb/big_cloth1/data";
 
 let asset = new Array();
-let link = [e, exp, exp2], cardName = ["【シャッターチャンス！？】和泉愛依", "【不機嫌なテーマパーク】芹沢あさひ", "【starring F】黛冬優子"];
+let link = [e, exp, exp2],
+    cardName = ["【シャッターチャンス！？】和泉愛依", "【不機嫌なテーマパーク】芹沢あさひ", "【starring F】黛冬優子"];
 
 let idolInfo = null,
     idolID = null,
@@ -20,7 +17,11 @@ let idolInfo = null,
 let dressInfo = null,
     dressID = null,
     dressType = null;
+
 let cn = null;
+
+let currentEdit = null;
+
 const BIG0 = "big_cloth0",
     BIG1 = "big_cloth1",
     SML0 = "sml_cloth0",
@@ -35,8 +36,10 @@ const $ = document.querySelectorAll.bind(document);
 async function Init() {
     UpdateLog();
 
-    document.getElementById("iptShiftX").placeholder = `X座標、推奨±${Math.round(window.innerWidth/ 2 / 100) * 100}`;
-    document.getElementById("iptShiftY").placeholder = `Y座標、推奨±${Math.round(window.innerHeight/ 2 / 100) * 100}`;
+    document.getElementById("iptShiftX").placeholder = `X座標、推奨±${Math.round(window.innerWidth / 2 / 100) * 100}`;
+    document.getElementById("iptShiftY").placeholder = `Y座標、推奨±${Math.round(window.innerHeight / 2 / 100) * 100}`;
+    document.getElementById("iptEditX").placeholder = `X座標、推奨±${Math.round(window.innerWidth / 2 / 100) * 100}`;
+    document.getElementById("iptEditY").placeholder = `Y座標、推奨±${Math.round(window.innerHeight / 2 / 100) * 100}`;
     // Setup canvas and WebGL context. We pass alpha: false to canvas.getContext() so we don't use premultiplied alpha when
     // loading textures. That is handled separately by PolygonBatcher.
     canvas = document.getElementById("big_canvas");
@@ -51,8 +54,8 @@ async function Init() {
 
     // Create a simple shader, mesh, model-view-projection matrix and SkeletonRenderer.
     let g = -400;
-    for (let k = 0; k < link.length; k++) { 
-        CreateNewObject(link[k], cardName[k], g); 
+    for (let k = 0; k < link.length; k++) {
+        CreateNewObject(link[k], cardName[k], g);
         g += 400;
     }
 
@@ -105,62 +108,6 @@ function HexToRgb(hex) {
             return parseInt(item, 16) / 255;
         }) :
         null;
-}
-
-function DropHandler(event) {
-    // Prevent default behavior (Prevent file from being opened)
-    event.preventDefault();
-
-    if (event.dataTransfer.items) {
-        for (let item of event.dataTransfer.items) {
-            if (item.kind === "file") {
-                const file = item.getAsFile();
-                const blobURL = window.URL.createObjectURL(file);
-                if (file.name.endsWith(".atlas")) {
-                    pathAtlas = blobURL;
-                } else if (file.name.endsWith(".png")) {
-                    pathTexture = blobURL;
-                } else if (file.name.endsWith(".json")) {
-                    pathJSON = blobURL;
-                } else if (file.name.endsWith(".webp")) {
-                    pathTexture = blobURL;
-                }
-            }
-        }
-    } else {
-        for (let file of event.dataTransfer.files) {
-            const blobURL = window.URL.createObjectURL(file);
-            if (file.name.endsWith(".atlas")) {
-                pathAtlas = blobURL;
-            } else if (file.name.endsWith(".png")) {
-                pathTexture = blobURL;
-            } else if (file.name.endsWith(".json")) {
-                pathJSON = blobURL;
-            } else if (file.name.endsWith(".webp")) {
-                pathTexture = blobURL;
-            }
-        }
-    }
-
-    if (pathAtlas && pathTexture && pathJSON) {
-        requestAnimationFrame(LoadAsset);
-    } else {
-        const loadedFiles = [pathAtlas ? "Atlas" : null, pathTexture ? "이미지" : null, pathJSON ? "JSON" : null].filter((item) => item).join(", ");
-
-        alert("3개의 파일 (data.json, data.atlas, data.png) 을 한꺼번에 드롭해주세요.\n현재 불러온 파일: " + loadedFiles);
-        ClearDragStatus();
-    }
-}
-
-function ClearDragStatus() {
-    pathJSON = null;
-    pathAtlas = null;
-    pathTexture = null;
-}
-
-function DragOverHandler(event) {
-    // Prevent default behavior (Prevent file from being opened)
-    event.preventDefault();
 }
 
 function LoadAsset() {
@@ -350,59 +297,64 @@ async function SetupDressList() {
 }
 
 function SetupTypeList() {
+    if (!dressInfo) return;
     const typeList = $("#typeList")[0];
 
     typeList.innerHTML = "";
 
     let big0, big1, sml0, sml1;
-    let flag0 = false,
-        flag1 = false;
-    if (dressInfo[dressID]?.Dress0) {
-        big0 = document.createElement("option");
-        big0.textContent = "一般_通常服";
-        big0.value = BIG0;
-
+    let flag_sml0 = false, flag_big0 = false,
+        flag_sml1 = false, flag_big1 = false;
+    if (dressInfo[dressID].Sml_Cloth0) {
+        flag_sml0 = true;
         sml0 = document.createElement("option");
         sml0.textContent = "Q版_通常服";
         sml0.value = SML0;
-        flag0 = true;
+        typeList.appendChild(sml0);
     }
-    if (dressInfo[dressID]?.Dress1) {
-        big1 = document.createElement("option");
-        big1.textContent = "一般_演出服";
-        big1.value = BIG1;
-
+    if (dressInfo[dressID].Big_Cloth0) {
+        flag_big0 = true;
+        big0 = document.createElement("option");
+        big0.textContent = "一般_通常服";
+        big0.value = BIG0;
+        typeList.appendChild(big0);
+    }
+    if (dressInfo[dressID].Sml_Cloth1) {
+        flag_sml0 = true;
         sml1 = document.createElement("option");
         sml1.textContent = "Q版_演出服";
         sml1.value = SML1;
-        flag1 = true;
+        typeList.appendChild(sml1);
+    }
+    if (dressInfo[dressID].Big_Cloth1) {
+        flag_big1 = true;
+        big1 = document.createElement("option");
+        big1.textContent = "一般_演出服";
+        big1.value = BIG1;
+        typeList.appendChild(big1);
     }
 
-    if (flag0 && flag1) {
+    if (flag_big0) {
         dressType = BIG0;
         big0.selected = true;
-        typeList.appendChild(sml0);
-        typeList.appendChild(sml1);
-        typeList.appendChild(big0);
-        typeList.appendChild(big1);
-    } else if (flag0 && !flag1) {
-        dressType = BIG0;
-        big0.selected = true;
-        typeList.appendChild(sml0);
-        typeList.appendChild(big0);
-    } else if (!flag0 && flag1) {
+    }
+    else if (flag_big1) {
         dressType = BIG1;
         big1.selected = true;
-        typeList.appendChild(sml1);
-        typeList.appendChild(big1);
+    }
+    else if (flag_sml0) {
+        dressType = SML0;
+        sml0.selected = true;
+    }
+    else if (flag_sml1) {
+        dressType = SML1;
+        sml1.selected = true;
     }
 
     typeList.onchange = () => {
         dressType = typeList.value;
         ClearDragStatus();
     };
-
-    //console.log(dressInfo[dressID]);
 }
 
 function SetupAnimationList() {
@@ -484,7 +436,6 @@ function Render() {
     let delta = now - lastFrameTime;
     lastFrameTime = now;
 
-    // 배경 그리기
     WebGL.clearColor(...backgroundColor, 1);
     WebGL.clear(WebGL.COLOR_BUFFER_BIT);
     for (let z of spineObject) {
@@ -545,10 +496,10 @@ function AddToActiveList() {
     let newPath = [dataURL, idolInfo[idolID].Directory, dressInfo[dressID].DressUUID, dressType, "data"].join("/");
     let shiftX = Number(document.getElementById("iptShiftX").value),
         shiftY = Number(document.getElementById("iptShiftY").value),
-        scale  = Number(document.getElementById("iptScale").value);
+        scale = Number(document.getElementById("iptScale").value);
 
     scale = scale == 0 ? 0.8 : scale;
-    if(isNaN(shiftX) || isNaN(shiftY) || isNaN(scale)) {
+    if (isNaN(shiftX) || isNaN(shiftY) || isNaN(scale)) {
         alert("Please Input Numbers.");
     }
 
@@ -558,7 +509,7 @@ function AddToActiveList() {
 
     CreateNewObject(newPath, cn, shiftX, shiftY, scale);
     BuildActiveList();
-    
+
     LoadAsset();
 }
 //<a href="javascript:void(0)"><span class="badge badge-pill badge-primary ml-2">&times;</span></a>
@@ -593,19 +544,53 @@ function BuildActiveList() {
     }
 }
 
+function EditShift(e) {
+    currentEdit = e;
+    document.getElementById("iptEditX").value = spineObject[e].shiftX;
+    document.getElementById("iptEditY").value = spineObject[e].shiftY;
+    document.getElementById("iptEditScale").value = spineObject[e].scale;
+}
+
+function ConfirmEdit() {
+    if (currentEdit == null) return;
+
+    let sftX = Number(document.getElementById("iptEditX").value),
+        sftY = Number(document.getElementById("iptEditY").value),
+        scal = Number(document.getElementById("iptEditScale").value);
+
+    if (isNaN(sftX) || isNaN(sftY) || isNaN(scal)) return;
+
+    spineObject[currentEdit].shiftX = sftX;
+    spineObject[currentEdit].shiftY = sftY;
+    spineObject[currentEdit].scale = scal;
+    currentEdit = null;
+}
+
 function CreateActiveListElement(list, k) {
     const li = document.createElement("li");
     li.classList.add("dropdown-item", "ps-2", "pe-1", "btn");
-    li.appendChild(document.createTextNode(spineObject[k].name));
-    const button = document.createElement("button");
-    button.onclick = function () {
+
+    const button1 = document.createElement("button");
+    button1.classList.add("btn", "text-light");
+    button1.appendChild(document.createTextNode(spineObject[k].name));
+    button1.setAttribute("data-bs-toggle", "modal");
+    button1.setAttribute("data-bs-target", "#divEditCoord");
+    button1.onclick = function () {
+        EditShift(k);
+    }
+    li.appendChild(button1);
+
+    const button2 = document.createElement("button");
+    button2.onclick = function () {
         DeleteSpineObject(k);
     }
-    button.classList.add("btn");
+    button2.classList.add("btn");
+
     const span = document.createElement("span");
     span.classList.add("badge", "badge-pill", "badge-primary", "ml-2");
     span.innerHTML = "&times;";
-    button.appendChild(span);
-    li.appendChild(button);
+
+    button2.appendChild(span);
+    li.appendChild(button2);
     list.appendChild(li);
 }
