@@ -1,18 +1,16 @@
 let lastFrameTime = Date.now() / 1000;
 let canvas;
-let shader;
-let batcher;
 let WebGL;
 const mvp = new spine.webgl.Matrix4();
-let assetManager;
-let skeletonRenderer;
-let shapes;
+let assetManager, skeletonRenderer, shapes, shader, batcher;
 
 let pathJSON = null;
 let pathAtlas = null;
 let pathTexture = null;
 
 let asset = null;
+let dressMap = new Map();
+let dressTypes = new Array();
 
 let idolDir;
 
@@ -308,6 +306,9 @@ async function SetupDressList() {
     const dressList = $("#dressList")[0];
     dressList.innerHTML = "";
 
+    dressTypes = new Array();
+    dressMap.clear();
+
     dressInfo = (await axios.get(`https://api.shinycolors.moe/spines/dressList/${idolID}`)).data;
     //console.log(dressInfo);
     let flag = false;
@@ -322,7 +323,20 @@ async function SetupDressList() {
         option.value = index;
         if (!element.Exist) option.disabled = true;
         if (index == dressID) option.selected = true;
-        dressList.appendChild(option);
+        if (!dressMap.has(element.DressType)) {
+            dressMap.set(element.DressType, new Array());
+            dressTypes.push(element.DressType);
+        }
+        dressMap.get(element.DressType).push(option);
+    });
+
+    dressTypes.forEach(element => {
+        const optGroup = document.createElement("optgroup");
+        optGroup.label = element;
+        dressMap.get(element).forEach(e => {
+            optGroup.appendChild(e);
+        });
+        dressList.appendChild(optGroup);
     });
 
     dressList.onchange = () => {

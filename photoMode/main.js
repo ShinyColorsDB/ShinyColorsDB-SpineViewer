@@ -11,6 +11,8 @@ let asset = new Array();
 let link = [e, exp, exp2],
     cardName = ["【シャッターチャンス！？】和泉愛依", "【不機嫌なテーマパーク】芹沢あさひ", "【starring F】黛冬優子"];
 
+let dressMap = new Map(), dressTypes = new Array();
+
 let idolInfo = null,
     idolID = null,
     idolName = null;
@@ -267,6 +269,10 @@ async function SetupDressList() {
     const dressList = $("#dressList")[0];
     dressList.innerHTML = "";
 
+
+    dressTypes = new Array();
+    dressMap.clear();
+
     dressInfo = (await axios.get(`https://api.shinycolors.moe/spines/dressList/${idolID}`)).data;
     //console.log(dressInfo);
     let flag = false;
@@ -281,7 +287,20 @@ async function SetupDressList() {
         option.value = index;
         if (!element.Exist) option.disabled = true;
         if (index == dressID) option.selected = true;
-        dressList.appendChild(option);
+        if (!dressMap.has(element.DressType)) {
+            dressMap.set(element.DressType, new Array());
+            dressTypes.push(element.DressType);
+        }
+        dressMap.get(element.DressType).push(option);
+    });
+
+    dressTypes.forEach(element => {
+        const optGroup = document.createElement("optgroup");
+        optGroup.label = element;
+        dressMap.get(element).forEach(e => {
+            optGroup.appendChild(e);
+        });
+        dressList.appendChild(optGroup);
     });
 
     dressList.onchange = () => {
@@ -312,19 +331,19 @@ function SetupTypeList() {
         sml0.value = SML0;
         typeList.appendChild(sml0);
     }
-    if (dressInfo[dressID].Big_Cloth0) {
-        flag_big0 = true;
-        big0 = document.createElement("option");
-        big0.textContent = "一般_通常服";
-        big0.value = BIG0;
-        typeList.appendChild(big0);
-    }
     if (dressInfo[dressID].Sml_Cloth1) {
         flag_sml0 = true;
         sml1 = document.createElement("option");
         sml1.textContent = "Q版_演出服";
         sml1.value = SML1;
         typeList.appendChild(sml1);
+    }
+    if (dressInfo[dressID].Big_Cloth0) {
+        flag_big0 = true;
+        big0 = document.createElement("option");
+        big0.textContent = "一般_通常服";
+        big0.value = BIG0;
+        typeList.appendChild(big0);
     }
     if (dressInfo[dressID].Big_Cloth1) {
         flag_big1 = true;
