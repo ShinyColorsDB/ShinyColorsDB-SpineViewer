@@ -49,7 +49,7 @@ function SetupUpdateLog(updateLog) {
 function SetupIdolList() {
     const idolList = document.getElementById("idolList");
 
-    idolList.remove();
+    idolList.innerHTML = "";
 
     idolInfo.forEach((element, index) => {
         const option = document.createElement("option");
@@ -80,7 +80,7 @@ function testAndLoadDress() {
 
 function SetupDressList() {
     const dressList = document.getElementById("dressList");
-    dressList.remove();
+    dressList.innerHTML = "";
 
     dressTypes = new Array();
     dressMap.clear();
@@ -128,7 +128,7 @@ function SetupTypeList() {
     if (!dressInfo) return;
     const typeList = document.getElementById("typeList");
 
-    typeList.remove();
+    typeList.innerHTML = "";
 
     let big0, big1, sml0, sml1;
     let flag_sml0 = false, flag_big0 = false,
@@ -201,7 +201,7 @@ function SetupAnimationList() {
     const animationList = document.getElementById("animationList");
     currentSpine = new PIXI.spine.Spine(app.loader.resources[`${currentUUID}/${dressType}`].spineData);
 
-    animationList.remove();
+    animationList.innerHTML = "";
     const animationName = "wait"
 
     for (let animation of currentSpine.stateData.skeletonData.animations) {
@@ -248,7 +248,7 @@ function renderToStage(aName) {
 
     cont.position.set(
         (app.screen.width - cont.width) * 0.5,
-        (app.screen.height - cont.height) * 0.5
+        (app.screen.height) * 0.5
     );
 
     try {
