@@ -244,7 +244,7 @@ function renderToStage(aName) {
         case SML0:
             break;
         case SML1:
-            scale = 2;
+            scale = 2.5;
             break;
         case BIG0:
         case BIG1:
