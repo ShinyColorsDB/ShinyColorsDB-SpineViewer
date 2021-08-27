@@ -239,16 +239,28 @@ function renderToStage(aName) {
     const localRect = currentSpine.getLocalBounds();
     currentSpine.position.set(-localRect.x, -localRect.y);
     
-    if(currentSpine.spineData.height < 250) {
-        cont.scale.set(2);
-    }
-    else {
-        cont.scale.set(0.85);
+    let scale = 1;
+    switch(dressType) {
+        case SML0:
+            break;
+        case SML1:
+            scale = 2;
+            break;
+        case BIG0:
+        case BIG1:
+            scale = Math.min(
+                app.view.width / currentSpine.spineData.width,
+                app.view.height / currentSpine.spineData.height
+            ) * 0.85
+            break;
     }
 
+    //console.log(currentSpine.spineData.width, currentSpine.spineData.height, app.view.width, app.view.height);
+    
+    cont.scale.set(scale);
     cont.position.set(
         (app.screen.width - cont.width) * 0.5,
-        (app.screen.height) * 0.5
+        (app.screen.height - cont.height) * 0.5
     );
 
     try {
