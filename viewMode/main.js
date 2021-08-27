@@ -48,12 +48,9 @@ function SetupUpdateLog(updateLog) {
 
 function SetupIdolList() {
     const idolList = document.getElementById("idolList");
-    //console.log(idolList)
-    //const idolTextList = gameInfo.idol;
 
-    idolList.innerHTML = "";
+    idolList.remove();
 
-    //console.log(idolInfo);
     idolInfo.forEach((element, index) => {
         const option = document.createElement("option");
         option.textContent = element.IdolName;
@@ -63,11 +60,9 @@ function SetupIdolList() {
     });
     idolID = 1;
     idolName = idolInfo[idolID].Directory;
-    //return;
     idolList.onchange = () => {
         idolID = idolList.value;
         idolName = idolInfo[idolID].Directory;
-        //console.log(idolID, idolName);
         testAndLoadDress();
     };
 
@@ -85,7 +80,7 @@ function testAndLoadDress() {
 
 function SetupDressList() {
     const dressList = document.getElementById("dressList");
-    dressList.innerHTML = "";
+    dressList.remove();
 
     dressTypes = new Array();
     dressMap.clear();
@@ -121,8 +116,6 @@ function SetupDressList() {
         dressList.appendChild(optGroup);
     });
 
-    //console.log(dressInfo, dressID);
-
     dressList.onchange = () => {
         dressID = dressList.value;
         SetupTypeList();
@@ -135,7 +128,7 @@ function SetupTypeList() {
     if (!dressInfo) return;
     const typeList = document.getElementById("typeList");
 
-    typeList.innerHTML = "";
+    typeList.remove();
 
     let big0, big1, sml0, sml1;
     let flag_sml0 = false, flag_big0 = false,
@@ -188,7 +181,6 @@ function SetupTypeList() {
 
     typeList.onchange = () => {
         dressType = typeList.value;
-        //console.log(dressType);
         testAndLoadAnimation();
     };
 
@@ -207,11 +199,9 @@ function testAndLoadAnimation() {
 
 function SetupAnimationList() {
     const animationList = document.getElementById("animationList");
-    //console.log(app.loader.resources[currentUUID]);
     currentSpine = new PIXI.spine.Spine(app.loader.resources[`${currentUUID}/${dressType}`].spineData);
-    //const activeAnimation = currentSpine.state.tracks[0].animation.name;
 
-    animationList.innerHTML = "";
+    animationList.remove();
     const animationName = "wait"
 
     for (let animation of currentSpine.stateData.skeletonData.animations) {
@@ -266,8 +256,6 @@ function renderToStage(aName) {
     } catch (e) {
         currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
     }
-
-    //app.start();
 }
 
 function onJsonLoaded(loader, resources) {
