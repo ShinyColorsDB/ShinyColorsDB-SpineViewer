@@ -1,6 +1,4 @@
 let app, canvas;
-const testLink = "https://static.shinycolors.moe/spines/mano/a86b42a2-2f0d-4a88-8178-91aecebefae2/big_cloth0/data";
-const UUID = "a86b42a2-2f0d-4a88-8178-91aecebefae2";
 const apiLoader = new PIXI.Loader(), cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 let currentSpine = null;
