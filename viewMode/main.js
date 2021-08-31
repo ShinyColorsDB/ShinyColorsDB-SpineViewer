@@ -36,7 +36,7 @@ function DropHandler(event) {
             }
         }
     }
-    console.log(pathAtlas, pathJSON, pathTexture);
+    
     if (pathAtlas && pathTexture && pathJSON) {
         dropLoader
             .add("dropJson", pathJSON)
