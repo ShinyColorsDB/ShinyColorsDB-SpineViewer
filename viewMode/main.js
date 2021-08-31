@@ -1,11 +1,58 @@
 let app, canvas;
-const apiLoader = new PIXI.Loader(), cont = new PIXI.Container();
+const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 let currentSpine = null;
 let idolInfo, idolID, idolName;
 let dressTypes = new Array(), dressMap = new Map(), 
     dressInfo, dressType;
 let currentUUID = "";
+let pathJSON, pathAtlas, pathTexture;
+
+function DropHandler(event) {
+    event.preventDefault();
+    if (event.dataTransfer.items) {
+        for (let item of event.dataTransfer.items) {
+            if (item.kind === "file") {
+                const file = item.getAsFile();
+                const blobURL = window.URL.createObjectURL(file);
+                if (file.name.endsWith(".atlas")) {
+                    pathAtlas = blobURL;
+                } else if (file.name.endsWith(".png") || file.name.endsWith(".webp")) {
+                    pathTexture = file;
+                } else if (file.name.endsWith(".json")) {
+                    pathJSON = blobURL;
+                }
+            }
+        }
+    } else {
+        for (let file of event.dataTransfer.files) {
+            const blobURL = window.URL.createObjectURL(file);
+            if (file.name.endsWith(".atlas")) {
+                pathAtlas = blobURL;
+            } else if (file.name.endsWith(".png") || file.name.endsWith(".webp")) {
+                pathTexture = file;
+            } else if (file.name.endsWith(".json")) {
+                pathJSON = blobURL;
+            }
+        }
+    }
+    console.log(pathAtlas, pathJSON, pathTexture);
+    if (pathAtlas && pathTexture && pathJSON) {
+        dropLoader
+            .add("dropJson", pathJSON)
+            .add("dropAtlas", pathAtlas)
+            .load(renderByDrop);
+    }
+    else {
+        alert("missing files!");
+    }
+}
+
+function DragOverHandler(event) {
+    event.preventDefault();
+    dropLoader.reset();
+}
+
 function Init() {
     canvas = document.getElementById("canvas");
 
@@ -222,6 +269,28 @@ function SetupAnimationList() {
     renderToStage(animationName);
 }
 
+async function renderByDrop() {
+    const rawJson = JSON.parse(dropLoader.resources.dropJson.data);
+    const rawAtlas = dropLoader.resources.dropAtlas.data;
+    const rawTexture = await blobToBase64(pathTexture);
+    const spineAtlas = new PIXI.spine.core.TextureAtlas(rawAtlas, (line, callback) => {
+        callback(PIXI.BaseTexture.from(rawTexture));
+    });
+    const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
+    const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
+    const spineData = spineJsonParser.readSkeletonData(rawJson);
+    currentSpine = new PIXI.spine.Spine(spineData);
+    renderToStage("wait");
+}
+
+function blobToBase64(blob) {
+    return new Promise((resolve, _) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  }
+
 function renderToStage(aName) {
     try {
         currentSpine.skeleton.setSkinByName('normal');
@@ -252,6 +321,7 @@ function renderToStage(aName) {
                 app.view.width / currentSpine.spineData.width,
                 app.view.height / currentSpine.spineData.height
             ) * 0.85
+            if (scale < 0.8) scale = 0.8;
             break;
     }
 
