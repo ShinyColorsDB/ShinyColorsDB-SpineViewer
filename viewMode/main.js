@@ -68,9 +68,9 @@ function Init() {
         .add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
         .load(onJsonLoaded);
 
-    const colorPicker = document.querySelector("#colorPicker");
+    const colorPicker = document.getElementById("colorPicker");
     colorPicker.onchange = (event) => {
-        backgroundColor = HexToRgb(event.target.value);
+        app.renderer.backgroundColor = String(event.target.value).replace(/#/, '0X');
     };
 
 }
@@ -347,13 +347,4 @@ function onJsonLoaded(loader, resources) {
     idolInfo = JSON.parse(resources.IdolList.data)
     SetupUpdateLog(JSON.parse(resources.UpdateLog.data));
     SetupIdolList();
-}
-
-function HexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result
-        ? result.slice(1, 4).map((item) => {
-            return parseInt(item, 16) / 255;
-        })
-        : null;
 }
