@@ -9,7 +9,8 @@
         crossorigin="anonymous"></script>
 
     <!-- Cloudflare Web Analytics -->
-    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "3e38e18902dc4c00ad682d502f7f8b3c"}'></script>
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+        data-cf-beacon='{"token": "3e38e18902dc4c00ad682d502f7f8b3c"}'></script>
     <!-- End Cloudflare Web Analytics -->
 
     <meta charset="UTF-8" />
@@ -19,7 +20,7 @@
 
     <script src="https://pixijs.download/v5.3.10/pixi.js"></script>
     <script src="../pixi-spine.js"></script>
-    
+
     <!-- Primary Meta Tags -->
     <title>ShinyColors 戳戳樂~~</title>
     <meta name="title" content="ShinyColors Spine Viewer (Or Live2d?)">
@@ -29,16 +30,14 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://spine.shinycolors.moe/viewMode">
     <meta property="og:title" content="ShinyColors Spine Viewer">
-    <meta property="og:description"
-        content="A fan made website that renders spine for all costumes.">
+    <meta property="og:description" content="A fan made website that renders spine for all costumes.">
     <meta property="og:image" content="https://spine.shinycolors.moe/viewMode/preview.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://spine.shinycolors.moe/viewMode">
     <meta property="twitter:title" content="ShinyColors Spine Viewer">
-    <meta property="twitter:description"
-        content="A fan made website that renders spine for all costumes.">
+    <meta property="twitter:description" content="A fan made website that renders spine for all costumes.">
     <meta property="twitter:image" content="https://spine.shinycolors.moe/viewMode/preview.png">
 
     <script src="./main.js"></script>
@@ -50,7 +49,8 @@
         偶像大師 閃耀色彩, 偶閃, spine, live2d, シャニーマス, アイドルマスタシャニカラーズ
     </div>
 
-    <div class="modal fade" id="divUpdateLog" tabindex="-1" role="dialog" aria-labelledby="divUpdateLogLabel" aria-hidden="true">
+    <div class="modal fade" id="divUpdateLog" tabindex="-1" role="dialog" aria-labelledby="divUpdateLogLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -60,7 +60,7 @@
                     </button>
                 </div>
                 <div class="modal-body" id="divModalBody">
-                    
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -69,7 +69,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="divThanks" tabindex="-1" role="dialog" aria-labelledby="divThanksLabel" aria-hidden="true">
+    <div class="modal fade" id="divThanks" tabindex="-1" role="dialog" aria-labelledby="divThanksLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -91,6 +92,48 @@
         </div>
     </div>
 
+    <div class="modal fade" id="divLicense" tabindex="-1" role="dialog" aria-labelledby="divLicenseLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divLicenseLabel">LICENSE</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divLicenseBody">
+                    Spine Runtimes License Agreement <br>
+                    Last updated January 1, 2020. Replaces all prior versions.<br>
+
+                    Copyright (c) 2013-2020, Esoteric Software LLC<br>
+
+                    Integration of the Spine Runtimes into software or otherwise creating derivative works of the Spine<br>
+                    Runtimes is permitted under the terms and conditions of Section 2 of the Spine Editor License<br>
+                    Agreement:<br>
+                    http://esotericsoftware.com/spine-editor-license<br>
+                    <br>
+                    Otherwise, it is permitted to integrate the Spine Runtimes into software or otherwise create<br>
+                    derivative works of the Spine Runtimes (collectively, "Products"), provided that each user of the<br>
+                    Products must obtain their own Spine Editor license and redistribution of the Products in any form<br>
+                    must include this license and copyright notice.<br>
+                    <br>
+                    THE SPINE RUNTIMES ARE PROVIDED BY ESOTERIC SOFTWARE LLC "AS IS" AND ANY EXPRESS OR IMPLIED<br>
+                    WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR<br>
+                    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ESOTERIC SOFTWARE LLC BE LIABLE FOR ANY<br>
+                    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT<br>
+                    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS INTERRUPTION, OR LOSS OF USE,<br>
+                    DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT<br>
+                    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE<br>
+                    SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.<br>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid d-flex p-0">
         <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark w-25 min-vh-100 d-inline-block" id="divSidebar">
             <span>Idol:</span>
@@ -104,12 +147,15 @@
 
             <span>Background Color:</span>
             <input type="color" class="mb-3 form-control w-100" id="colorPicker" />
-            <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2" onclick="location.href = '../photoMode'"
-                value="PhotoMode">
+            <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2"
+                onclick="location.href = '../photoMode'" value="PhotoMode">
 
-            <input type="button" class="btn btn-primary mb-3" id="showLog" data-bs-toggle="modal" data-bs-target="#divUpdateLog" value="update log">
-            <input type="button" class="btn btn-success" id="showThanks" data-bs-toggle="modal" data-bs-target="#divThanks" value="Special Thanks">
-
+            <input type="button" class="btn btn-primary mb-3" id="showLog" data-bs-toggle="modal"
+                data-bs-target="#divUpdateLog" value="update log">
+            <input type="button" class="btn btn-success mb-3" id="showThanks" data-bs-toggle="modal"
+                data-bs-target="#divThanks" value="Special Thanks">
+            <input type="button" class="btn btn-success" id="showLicense" data-bs-toggle="modal"
+                data-bs-target="#divLicense" value="LICENSE">
         </div>
         <canvas id="canvas" class="flex-column p-0 w-75 d-inline-block min-vh-100"></canvas>
 
