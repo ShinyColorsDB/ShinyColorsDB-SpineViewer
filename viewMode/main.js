@@ -3,7 +3,7 @@ const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new 
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 let currentSpine = null;
 let idolInfo, idolID, idolName;
-let dressTypes = new Array(), dressMap = new Map(), 
+let dressTypes = new Array(), dressMap = new Map(),
     dressInfo, dressType;
 let currentUUID = "";
 let pathJSON, pathAtlas, pathTexture;
@@ -36,7 +36,7 @@ function DropHandler(event) {
             }
         }
     }
-    
+
     if (pathAtlas && pathTexture && pathJSON) {
         dropLoader
             .add("dropJson", pathJSON)
@@ -68,11 +68,16 @@ function Init() {
         .add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
         .load(onJsonLoaded);
 
+    const colorPicker = document.querySelector("#colorPicker");
+    colorPicker.onchange = (event) => {
+        backgroundColor = HexToRgb(event.target.value);
+    };
+
 }
 
 function SetupUpdateLog(updateLog) {
     let modal = document.getElementById("divModalBody");
-    
+
     updateLog.forEach(element => {
         let divTitle = document.createElement("div");
         divTitle.classList.add("p-1");
@@ -86,8 +91,8 @@ function SetupUpdateLog(updateLog) {
             divContent.appendChild(span);
             divContent.appendChild(document.createElement("br"));
         });
-        
-        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date.substr(0,10))));
+
+        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date.substr(0, 10))));
         modal.appendChild(divContent);
     });
     document.getElementById('showLog').click();
@@ -236,7 +241,7 @@ function SetupTypeList() {
 
 function testAndLoadAnimation() {
     currentUUID = dressInfo[dressID].DressUUID;
-    if(!app.loader.resources[`${currentUUID}/${dressType}`]) {
+    if (!app.loader.resources[`${currentUUID}/${dressType}`]) {
         app.loader.add(`${currentUUID}/${dressType}`, `https://static.shinycolors.moe/spines/${idolName}/${currentUUID}/${dressType}/data.json`).load(SetupAnimationList);
     }
     else {
@@ -285,11 +290,11 @@ async function renderByDrop() {
 
 function blobToBase64(blob) {
     return new Promise((resolve, _) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(blob);
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
     });
-  }
+}
 
 function renderToStage(aName) {
     try {
@@ -307,9 +312,9 @@ function renderToStage(aName) {
 
     const localRect = currentSpine.getLocalBounds();
     currentSpine.position.set(-localRect.x, -localRect.y);
-    
+
     let scale = 1;
-    switch(dressType) {
+    switch (dressType) {
         case SML0:
             break;
         case SML1:
@@ -325,8 +330,6 @@ function renderToStage(aName) {
             break;
     }
 
-    //console.log(currentSpine.spineData.width, currentSpine.spineData.height, app.view.width, app.view.height);
-    
     cont.scale.set(scale);
     cont.position.set(
         (app.screen.width - cont.width) * 0.5,
@@ -344,4 +347,13 @@ function onJsonLoaded(loader, resources) {
     idolInfo = JSON.parse(resources.IdolList.data)
     SetupUpdateLog(JSON.parse(resources.UpdateLog.data));
     SetupIdolList();
+}
+
+function HexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+        ? result.slice(1, 4).map((item) => {
+            return parseInt(item, 16) / 255;
+        })
+        : null;
 }
