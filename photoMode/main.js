@@ -97,7 +97,7 @@ async function UpdateLog() {
             divContent.appendChild(document.createElement("br"));
         });
 
-        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date.substr(0, 10))));
+        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date)));
         modal.appendChild(divContent);
     });
     document.getElementById('showLog').click();
