@@ -261,7 +261,6 @@ function SetupIdolList() {
         idolID = idolList.value;
         SetupDressList();
         SetupTypeList();
-        ClearDragStatus();
     };
 }
 
@@ -308,7 +307,6 @@ async function SetupDressList() {
         cn = dressList.options[dressList.selectedIndex].text;
         console.log(dressList.value);
         SetupTypeList();
-        ClearDragStatus();
     };
 
     SetupTypeList();
@@ -372,7 +370,6 @@ function SetupTypeList() {
 
     typeList.onchange = () => {
         dressType = typeList.value;
-        ClearDragStatus();
     };
 }
 
