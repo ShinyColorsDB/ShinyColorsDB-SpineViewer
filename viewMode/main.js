@@ -7,7 +7,7 @@ let dressTypes = new Array(), dressMap = new Map(),
     dressInfo, dressType;
 let currentUUID = "";
 let pathJSON, pathAtlas, pathTexture;
-//euphokumiko.iem06[at]nctu.edu.tw
+
 function DropHandler(event) {
     event.preventDefault();
     if (event.dataTransfer.items) {
