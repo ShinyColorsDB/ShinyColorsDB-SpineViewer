@@ -8,8 +8,10 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="../spine.js"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script-->
+    <script src="https://pixijs.download/v5.3.10/pixi.js"></script>
+    <script src="../pixi-spine.js"></script>
+    <!--script src="../spine.js"></script-->
 
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
@@ -39,7 +41,7 @@
     <meta property="twitter:description" content="A fan made website that renders live2d for each card.">
     <meta property="twitter:image" content="https://spine.shinycolors.moe/photoMode/preview.png">
 
-    <script src="./main.js"></script>
+    <script src="./main2.js"></script>
     <link rel="stylesheet" href="./style.css" />
 
 </head>
@@ -206,7 +208,7 @@
             <select id="animationList" class="form-select" aria-label="Default select example"></select>
 
             <span>Background Color:</span>
-            <input type="color" class="mb-3 form-control w-100 ml-0" id="color-picker" />
+            <input type="color" class="mb-3 form-control w-100 ml-0" id="colorPicker" />
 
             <button class="btn btn-primary mb-3 w-100" onclick="document.getElementById('closeOffCanvas').click()"
                 data-bs-toggle="modal" data-bs-target="#divCoordinate">
@@ -228,7 +230,7 @@
         <canvas class="d-inline-block h-100 flex-column" id="sml_canvas"></canvas>
     </div>
 
-    <canvas id="big_canvas" class="flex-column p-0 w-100 h-100"></canvas>
+    <canvas id="bigCanvas" class="flex-column p-0 w-100 h-100"></canvas>
 
     <nav class="navbar navbar-expand-lg fixed-bottom bg-secondary">
         <div class="dropup">
