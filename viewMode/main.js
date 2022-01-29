@@ -66,6 +66,7 @@ function Init() {
     apiLoader
         .add("IdolList", "https://api.shinycolors.moe/spines/IdolList")
         .add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
+        .add("Version", "https://api.shinycolors.moe/spines/Version")
         .load(onJsonLoaded);
 
     const colorPicker = document.getElementById("colorPicker");
