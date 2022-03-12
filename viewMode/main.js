@@ -243,7 +243,7 @@ function SetupTypeList() {
 function testAndLoadAnimation() {
     currentUUID = dressInfo[dressID].DressUUID;
     if (!app.loader.resources[`${currentUUID}/${dressType}`]) {
-        app.loader.add(`${currentUUID}/${dressType}`, `https://static.shinycolors.moe/spines/${idolName}/${currentUUID}/${dressType}/data.json`).load(SetupAnimationList);
+        app.loader.add(`${currentUUID}/${dressType}`, `https://static.shinycolors.moe/spines/${currentUUID}/${dressType}/data.json`).load(SetupAnimationList);
     }
     else {
         SetupAnimationList();
