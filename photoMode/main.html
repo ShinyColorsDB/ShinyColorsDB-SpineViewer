@@ -9,7 +9,9 @@
         crossorigin="anonymous"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="../spine.js"></script>
+    <script src="https://pixijs.download/v5.3.10/pixi.js"></script>
+    <script src="../pixi-spine.js"></script>
+    <!--script src="../spine.js"></script-->
 
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
@@ -117,7 +119,11 @@
                     <div class="input-group">
                         <span class="input-group-text" id="iptScaleDesc">スケール</span>
                         <input type="number" class="form-control" id="iptScale" placeholder="スケール"
-                            aria-describedby="iptScaleDesc" value="0.8"/>
+                            aria-describedby="iptScaleDesc" value="0.8" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text" id="iptAnimationDesc">アニメーション</span>
+                        <select id="iptAnimation" class="form-select" aria-label="Default select example"></select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -153,7 +159,11 @@
                     <div class="input-group">
                         <span class="input-group-text" id="iptEditScaleDesc">スケール</span>
                         <input type="number" class="form-control" id="iptEditScale" placeholder="スケール"
-                            aria-describedby="iptScaleDesc"/>
+                            aria-describedby="iptScaleDesc" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text" id="iptEditAnimationDesc">アニメーション</span>
+                        <select id="iptEditAnimation" class="form-select" aria-label="Default select example"></select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -195,47 +205,39 @@
 
     <div class="offcanvas offcanvas-end p-0 d-flex container-fluid ofs" id="offcanvasMenu" aria-labelledby="offcanvas"
         tabindex="1">
-        <div class="offcanvas-body bg-secondary d-inline-block d-flex flex-column">
+        
+        <div class="offcanvas-body bg-secondary d-flex flex-column container d-inline-box">
             <span class="mt-2">アイドル:</span>
-            <select id="idolList" class="form-select" aria-label="Default select example"></select>
-            <span class="mt-2">ドレス:</span>
-            <select id="dressList" class="form-select" aria-label="Default select example"></select>
-            <span class="mt-2">タイプ:</span>
-            <select id="typeList" class="form-select" aria-label="Default select example"></select>
-            <span class="mt-2">アニメーション:</span>
-            <select id="animationList" class="form-select" aria-label="Default select example"></select>
+                <select id="idolList" class="form-select mySelect" aria-label="Default select example"></select>
+                <span class="mt-2">ドレス:</span>
+                <select id="dressList" class="form-select mySelect" aria-label="Default select example"></select>
+                <span class="mt-2">タイプ:</span>
+                <select id="typeList" class="form-select mySelect" aria-label="Default select example"></select>
 
-            <span>Background Color:</span>
-            <input type="color" class="mb-3 form-control w-100 ml-0" id="color-picker" />
+                <span>Background Color:</span>
+                <input type="color" class="mb-3 form-control w-100 ml-0" id="colorPicker" />
 
-            <button class="btn btn-primary mb-3 w-100" onclick="document.getElementById('closeOffCanvas').click()"
-                data-bs-toggle="modal" data-bs-target="#divCoordinate">
-                Add To Canvas
-            </button>
-            <button class="d-none" id="closeOffCanvas" data-bs-target="#offcanvasMenu" data-bs-toggle="offcanvas">
+                <button class="btn btn-primary mb-3 w-100" onclick="document.getElementById('closeOffCanvas').click()"
+                    data-bs-toggle="modal" data-bs-target="#divCoordinate">
+                    Add To Canvas
+                </button>
+                <button class="d-none" id="closeOffCanvas" data-bs-target="#offcanvasMenu" data-bs-toggle="offcanvas"></button>
 
-            </button>
-
-            <button class="btn btn-success mb-3 w-100" id="showLog" data-bs-toggle="modal"
-                data-bs-target="#divUpdateLog">Update Log</button>
-            <button class="btn btn-success w-100" id="showThanks" data-bs-toggle="modal"
-                data-bs-target="#divThanks">Special Thanks</button>
+                <button class="btn btn-success mb-3 w-100" id="showLog" data-bs-toggle="modal"
+                    data-bs-target="#divUpdateLog">Update Log</button>
+                <button class="btn btn-success w-100" id="showThanks" data-bs-toggle="modal"
+                    data-bs-target="#divThanks">Special Thanks</button>            
         </div>
     </div>
 
-    <div class="offcanvas offcanvas-start p-0 d-flex container-fluid ofs" id="offcanvasMenu2" aria-labelledby="offcanvas"
-        tabindex="1">
-        <canvas class="d-inline-block h-100 flex-column" id="sml_canvas"></canvas>
-    </div>
-
-    <canvas id="big_canvas" class="flex-column p-0 w-100 h-100"></canvas>
+    <canvas id="bigCanvas" class="flex-column p-0 w-100 h-100"></canvas>
 
     <nav class="navbar navbar-expand-lg fixed-bottom bg-secondary">
         <div class="dropup">
             <button class="btn btn-secondary dropdown-toggle" role="button" id="dropdownSpine" data-bs-toggle="dropdown"
                 aria-expanded="false">Active Spine</button>
             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownSpine" id="activeSpine">
-                
+
             </ul>
         </div>
     </nav>
