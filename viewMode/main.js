@@ -55,10 +55,11 @@ function init() {
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
+        view: canvas,
         width: canvas.clientWidth,
-        height: canvas.clientHeight,
-        view: canvas
+        height: canvas.clientHeight
     });
+
     app.stage.addChild(cont);
 
     apiLoader
@@ -228,8 +229,9 @@ function setupTypeList(dressObj) {
     }
 
     typeList.onchange = () => {
+        const dressList = document.getElementById("dressList");
         dressType = typeList.value;
-        testAndLoadAnimation(dressObj.DressUUID, dressType);
+        testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("dressUUID"), dressType);
     };
 
     testAndLoadAnimation(dressObj.DressUUID, dressType);
@@ -242,7 +244,7 @@ function testAndLoadAnimation(uuid, type) {
         });
     }
     else {
-        setupAnimationList(resources[`${uuid}/${type}`].spineData);
+        setupAnimationList(app.loader.resources[`${uuid}/${type}`].spineData);
     }
 }
 
