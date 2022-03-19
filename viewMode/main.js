@@ -1,15 +1,11 @@
-let app, canvas;
+'use strict';
+let app;
 const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
-let currentSpine = null;
-let idolInfo, idolID, idolName;
-let dressTypes = new Array(), dressMap = new Map(),
-    dressInfo, dressType;
-let currentUUID = "";
-let pathJSON, pathAtlas, pathTexture;
 
-function DropHandler(event) {
+function dropHandler(event) {
     event.preventDefault();
+    let pathJSON, pathAtlas, pathTexture;
     if (event.dataTransfer.items) {
         for (let item of event.dataTransfer.items) {
             if (item.kind === "file") {
@@ -41,20 +37,22 @@ function DropHandler(event) {
         dropLoader
             .add("dropJson", pathJSON)
             .add("dropAtlas", pathAtlas)
-            .load(renderByDrop);
+            .load(function(loader, resources) {
+                renderByDrop(resources.dropAtlas.data, JSON.parse(resources.dropJson.data), pathTexture);
+            });
     }
     else {
         alert("missing files!");
     }
 }
 
-function DragOverHandler(event) {
+function dragOverHandler(event) {
     event.preventDefault();
     dropLoader.reset();
 }
 
-function Init() {
-    canvas = document.getElementById("canvas");
+function init() {
+    const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
         width: canvas.clientWidth,
@@ -66,17 +64,27 @@ function Init() {
     apiLoader
         .add("IdolList", "https://api.shinycolors.moe/spines/IdolList")
         .add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
-        .add("Version", "https://api.shinycolors.moe/spines/Version")
-        .load(onJsonLoaded);
+        //.add("Version", "https://api.shinycolors.moe/spines/Version")
+        .load(function(loader, resources) {
+            onJsonLoaded(JSON.parse(resources.IdolList.data), JSON.parse(resources.UpdateLog.data));
+        });
 
     const colorPicker = document.getElementById("colorPicker");
     colorPicker.onchange = (event) => {
         app.renderer.backgroundColor = String(event.target.value).replace(/#/, '0X');
     };
 
+    resetBtn.onclick = () => {
+        resetAllAnimation();
+    }
 }
 
-function SetupUpdateLog(updateLog) {
+function onJsonLoaded(idolList, updateLog) {
+    setupUpdateLog(updateLog);
+    setupIdolList(idolList);
+}
+
+function setupUpdateLog(updateLog) {
     let modal = document.getElementById("divModalBody");
 
     updateLog.forEach(element => {
@@ -99,9 +107,9 @@ function SetupUpdateLog(updateLog) {
     document.getElementById('showLog').click();
 }
 
-function SetupIdolList() {
+function setupIdolList(idolInfo) {
     const idolList = document.getElementById("idolList");
-
+    let idolId = 1, idolName = 'mano';
     idolList.innerHTML = "";
 
     idolInfo.forEach((element, index) => {
@@ -111,103 +119,90 @@ function SetupIdolList() {
         if (index == 1) option.selected = true;
         idolList.appendChild(option);
     });
-    idolID = 1;
-    idolName = idolInfo[idolID].Directory;
+
     idolList.onchange = () => {
-        idolID = idolList.value;
-        idolName = idolInfo[idolID].Directory;
-        testAndLoadDress();
+        idolId = idolList.value;
+        idolName = idolInfo[idolId].Directory;
+        testAndLoadDress(idolId, idolName);
     };
 
-    testAndLoadDress();
+    testAndLoadDress(idolId, idolName);
 }
 
-function testAndLoadDress() {
+function testAndLoadDress(idolId, idolName) {
     if (!apiLoader.resources[idolName]) {
-        apiLoader.add(idolName, `https://api.shinycolors.moe/spines/dressList/${idolID}`).load(SetupDressList);
+        apiLoader.add(idolName, `https://api.shinycolors.moe/spines/dressList/${idolId}`).load(function(loader, resources) {
+            setupDressList(JSON.parse(resources[idolName].data));
+        });
     }
     else {
-        SetupDressList();
+        setupDressList(JSON.parse(resources[idolName].data));
     }
 }
 
-function SetupDressList() {
+function setupDressList(idolDressList) {
     const dressList = document.getElementById("dressList");
     dressList.innerHTML = "";
 
-    dressTypes = new Array();
-    dressMap.clear();
+    let lastType = "P_SSR", optGroup = document.createElement('optgroup');
+    optGroup.label = "P_SSR";
 
-    if (!apiLoader.resources[idolName].data) return;
-
-    dressInfo = JSON.parse(apiLoader.resources[idolName].data);
-    let flag = false;
-
-    dressInfo.forEach((element, index) => {
-        if (element.Exist && !flag) {
-            flag = true;
-            dressID = index;
+    idolDressList.forEach((element, index) => {
+        if (element.DressType != lastType) {
+            if (optGroup.childElementCount > 0) {
+                dressList.appendChild(optGroup);
+            }
+            lastType = element.DressType;
+            optGroup = document.createElement('optgroup');
+            optGroup.label = element.DressType;
         }
-        const option = document.createElement("option");
+        let option = document.createElement("option");
         option.textContent = element.DressName;
-        option.value = index;
-        if (!element.Exist) option.disabled = true;
-        if (index == dressID) option.selected = true;
-        if (!dressMap.has(element.DressType)) {
-            dressMap.set(element.DressType, new Array());
-            dressTypes.push(element.DressType);
-        }
-        dressMap.get(element.DressType).push(option);
+        option.setAttribute("value", index);
+        option.setAttribute("dressUUID", element.DressUUID);
+        optGroup.appendChild(option);
     });
+    dressList.appendChild(optGroup);
 
-    dressTypes.forEach(element => {
-        const optGroup = document.createElement("optgroup");
-        optGroup.label = element;
-        dressMap.get(element).forEach(e => {
-            optGroup.appendChild(e);
-        });
-        dressList.appendChild(optGroup);
-    });
-
+    let arrayOrder = 0;
     dressList.onchange = () => {
-        dressID = dressList.value;
-        SetupTypeList();
+        arrayOrder = dressList.value;
+        setupTypeList(idolDressList[arrayOrder]);
     };
 
-    SetupTypeList();
+    setupTypeList(idolDressList[arrayOrder]);
 }
 
-function SetupTypeList() {
-    if (!dressInfo) return;
+function setupTypeList(dressObj) {
     const typeList = document.getElementById("typeList");
-
+    let dressType;
     typeList.innerHTML = "";
 
     let big0, big1, sml0, sml1;
     let flag_sml0 = false, flag_big0 = false,
         flag_sml1 = false, flag_big1 = false;
-    if (dressInfo[dressID].Sml_Cloth0) {
+    if (dressObj.Sml_Cloth0) {
         flag_sml0 = true;
         sml0 = document.createElement("option");
         sml0.textContent = "Q版_通常服";
         sml0.value = SML0;
         typeList.appendChild(sml0);
     }
-    if (dressInfo[dressID].Sml_Cloth1) {
+    if (dressObj.Sml_Cloth1) {
         flag_sml0 = true;
         sml1 = document.createElement("option");
         sml1.textContent = "Q版_演出服";
         sml1.value = SML1;
         typeList.appendChild(sml1);
     }
-    if (dressInfo[dressID].Big_Cloth0) {
+    if (dressObj.Big_Cloth0) {
         flag_big0 = true;
         big0 = document.createElement("option");
         big0.textContent = "一般_通常服";
         big0.value = BIG0;
         typeList.appendChild(big0);
     }
-    if (dressInfo[dressID].Big_Cloth1) {
+    if (dressObj.Big_Cloth1) {
         flag_big1 = true;
         big1 = document.createElement("option");
         big1.textContent = "一般_演出服";
@@ -234,51 +229,95 @@ function SetupTypeList() {
 
     typeList.onchange = () => {
         dressType = typeList.value;
-        testAndLoadAnimation();
+        testAndLoadAnimation(dressObj.DressUUID, dressType);
     };
 
-    testAndLoadAnimation();
+    testAndLoadAnimation(dressObj.DressUUID, dressType);
 }
 
-function testAndLoadAnimation() {
-    currentUUID = dressInfo[dressID].DressUUID;
-    if (!app.loader.resources[`${currentUUID}/${dressType}`]) {
-        app.loader.add(`${currentUUID}/${dressType}`, `https://static.shinycolors.moe/spines/${currentUUID}/${dressType}/data.json`).load(SetupAnimationList);
+function testAndLoadAnimation(uuid, type) {
+    if (!app.loader.resources[`${uuid}/${type}`]) {
+        app.loader.add(`${uuid}/${type}`, `https://static.shinycolors.moe/spines/${uuid}/${type}/data.json`).load(function(loader, resources) {
+            setupAnimationList(resources[`${uuid}/${type}`].spineData);
+        });
     }
     else {
-        SetupAnimationList();
+        setupAnimationList(resources[`${uuid}/${type}`].spineData);
     }
 }
 
-function SetupAnimationList() {
-    const animationList = document.getElementById("animationList");
-    currentSpine = new PIXI.spine.Spine(app.loader.resources[`${currentUUID}/${dressType}`].spineData);
+function setupAnimationList(spineData) {
+    const animationList1 = document.getElementById("animationList1"),
+        animationList2 = document.getElementById("animationList2"),
+        animationList3 = document.getElementById("animationList3"),
+        animationList4 = document.getElementById("animationList4");
 
-    animationList.innerHTML = "";
-    const animationName = "wait"
+    const defaultAnimation = "wait", noAnimation = "none";
 
-    for (let animation of currentSpine.stateData.skeletonData.animations) {
-        const name = animation.name;
-        const option = document.createElement("option");
-        option.textContent = name;
-        option.value = name;
-        option.selected = name === "wait";
-        animationList.appendChild(option);
+    let currentSpine = new PIXI.spine.Spine(spineData);
+
+    try {
+        currentSpine.skeleton.setSkinByName('normal');
+    } catch (e) {
+        currentSpine.skeleton.setSkinByName('default');
     }
 
-    animationList.onchange = () => {
-        const animationName = animationList.value;
+    try {
+        currentSpine.state.setAnimation(0, defaultAnimation, true);
+    } catch (e) {
+        currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
+    }
 
-        renderToStage(animationName);
-    };
+    for (let list of [animationList1, animationList2, animationList3, animationList4]) {
+        list.innerHTML = "";
 
-    renderToStage(animationName);
+        if (list != animationList1) {
+            const de = document.createElement("option");
+            de.textContent = noAnimation;
+            de.value = noAnimation;
+            de.selected = true;
+            list.appendChild(de);
+        }
+
+        for (let animation of spineData.animations) {
+            const name = animation.name;
+            const option = document.createElement("option");
+            option.textContent = name;
+            option.value = name;
+            option.selected = (name === defaultAnimation) && (list == animationList1);
+            list.appendChild(option);
+        }
+
+    }
+
+    animationOnChange(animationList1, 0, currentSpine);
+    animationOnChange(animationList2, 1, currentSpine);
+    animationOnChange(animationList3, 2, currentSpine);
+    animationOnChange(animationList4, 3, currentSpine);
+
+    renderToStage(currentSpine);
 }
 
-async function renderByDrop() {
-    const rawJson = JSON.parse(dropLoader.resources.dropJson.data);
-    const rawAtlas = dropLoader.resources.dropAtlas.data;
-    const rawTexture = await blobToBase64(pathTexture);
+function animationOnChange(list, trackNo, currentSpine) {
+    list.onchange = () => {
+        console.log(`Changing track No. ${trackNo}`);
+        let newAnimation = list.value;
+        if (newAnimation == "none") {
+            currentSpine.state.clearTrack(trackNo);
+        }
+        else {
+            currentSpine.state.setAnimation(trackNo, newAnimation, true);
+        }                
+        currentSpine.skeleton.setToSetupPose();
+        currentSpine.update(0);
+        currentSpine.autoUpdate = true;
+    }
+}
+
+async function renderByDrop(dataAtlas, dataJson, dataTexture) {
+    const rawJson = dataJson;
+    const rawAtlas = dataAtlas;
+    const rawTexture = await blobToBase64(dataTexture);
     const spineAtlas = new PIXI.spine.core.TextureAtlas(rawAtlas, (line, callback) => {
         callback(PIXI.BaseTexture.from(rawTexture));
     });
@@ -297,15 +336,7 @@ function blobToBase64(blob) {
     });
 }
 
-function renderToStage(aName) {
-    try {
-        currentSpine.skeleton.setSkinByName('normal');
-    } catch (e) {
-        currentSpine.skeleton.setSkinByName('default');
-    }
-    currentSpine.skeleton.setToSetupPose();
-    currentSpine.update(0);
-    currentSpine.autoUpdate = true;
+function renderToStage(currentSpine) {
 
     cont.removeChild(cont.children[0]);
 
@@ -313,6 +344,8 @@ function renderToStage(aName) {
 
     const localRect = currentSpine.getLocalBounds();
     currentSpine.position.set(-localRect.x, -localRect.y);
+
+    const dressType = document.getElementById("typeList").value;
 
     let scale = 1;
     switch (dressType) {
@@ -337,15 +370,20 @@ function renderToStage(aName) {
         (app.screen.height - cont.height) * 0.5
     );
 
-    try {
-        currentSpine.state.setAnimation(0, aName, true);
-    } catch (e) {
-        currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
-    }
 }
 
-function onJsonLoaded(loader, resources) {
-    idolInfo = JSON.parse(resources.IdolList.data)
-    SetupUpdateLog(JSON.parse(resources.UpdateLog.data));
-    SetupIdolList();
+function resetAllAnimation() {
+    const animationList1 = document.getElementById("animationList1"),
+        animationList2 = document.getElementById("animationList2"),
+        animationList3 = document.getElementById("animationList3"),
+        animationList4 = document.getElementById("animationList4");
+
+    animationList1.value = "wait";
+    animationList1.dispatchEvent(new Event("change"));
+
+    for (let k of [animationList2, animationList3, animationList4]) {
+        k.value = "none";
+        k.dispatchEvent(new Event("change"));
+    }
+
 }

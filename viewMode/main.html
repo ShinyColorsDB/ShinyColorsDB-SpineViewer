@@ -44,7 +44,7 @@
     <script src="./main.js"></script>
 </head>
 
-<body ondrop="DropHandler(event);" ondragover="DragOverHandler(event);" onload="Init();">
+<body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" onload="init();">
     <div class="d-none">
         SC戳戳樂~ 這邊網羅了所有角色的衣服，就算你沒有那張卡也能舔老婆~ 
         shinycolors spine viewer, shinycolors live2d veiwer, 偶像大師閃耀色彩 live2d 資料網,
@@ -154,8 +154,15 @@
             <select id="dressList" class="form-select" aria-label="Default select example"></select>
             <span>Type:</span>
             <select id="typeList" class="form-select" aria-label="Default select example"></select>
-            <span>Animation:</span>
-            <select id="animationList" class="form-select" aria-label="Default select example"></select>
+            <span>Animation1:</span>
+            <select id="animationList1" class="form-select"></select>
+            <span>Animation2:</span>
+            <select id="animationList2" class="form-select"></select>
+            <span>Animation3:</span>
+            <select id="animationList3" class="form-select"></select>
+            <span>Animation4:</span>
+            <select id="animationList4" class="form-select"></select>
+            <input type="button" class="btn btn-primary mt-4" id="resetAnimation" value="Reset all animation">
 
             <span>Background Color:</span>
             <input type="color" class="mb-3 form-control w-100" id="colorPicker" />
@@ -166,13 +173,9 @@
                 data-bs-target="#divUpdateLog" value="Update Log">
             <input type="button" class="btn btn-success mb-3" id="showThanks" data-bs-toggle="modal"
                 data-bs-target="#divThanks" value="Special Thanks">
-            <!--input type="button" class="btn btn-success" id="showLicense" data-bs-toggle="modal"
-                data-bs-target="#divLicense" value="SPINE"-->
         </div>
         <canvas id="canvas" class="flex-column p-0 w-75 d-inline-block min-vh-100"></canvas>
 
-        <!--div class="flex-column p-0 w-75 d-inline-block" id="divCanvas" style="min-height: 100%">
-        </div-->
     </div>
 
 </body>
