@@ -231,10 +231,36 @@ function setupTypeList(dressObj) {
     typeList.onchange = () => {
         const dressList = document.getElementById("dressList");
         dressType = typeList.value;
+
+        if (dressType == SML0 || dressType == SML1) {
+            toggleTrackSelectList(false);
+        }
+        else {
+            toggleTrackSelectList(true);
+        }
+
         testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("dressUUID"), dressType);
     };
 
     testAndLoadAnimation(dressObj.DressUUID, dressType);
+}
+
+function toggleTrackSelectList(toggle) {
+    const animationList2 = document.getElementById("animationList2"),
+        animationList3 = document.getElementById("animationList3"),
+        animationList4 = document.getElementById("animationList4");
+    if (!toggle) { // disable
+        for (let k of [animationList2, animationList3, animationList4]) {
+            k.classList.add("bg-secondary");
+            k.disabled = true;
+        }        
+    }
+    else { //enable
+        for (let k of [animationList2, animationList3, animationList4]) {
+            k.classList.remove("bg-secondary");
+            k.disabled = false;
+        }
+    }
 }
 
 function testAndLoadAnimation(uuid, type) {
