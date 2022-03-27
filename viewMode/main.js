@@ -52,6 +52,7 @@ function dragOverHandler(event) {
 }
 
 function init() {
+    let animationCount = 1;
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
@@ -279,20 +280,20 @@ function setupAnimationList(spineData) {
         animationList2 = document.getElementById("animationList2"),
         animationList3 = document.getElementById("animationList3"),
         animationList4 = document.getElementById("animationList4");
-
     const defaultAnimation = "wait", noAnimation = "none";
 
     let currentSpine = new PIXI.spine.Spine(spineData);
-
+    
     try {
         currentSpine.skeleton.setSkinByName('normal');
     } catch (e) {
         currentSpine.skeleton.setSkinByName('default');
     }
 
-    try {
+    if (currentSpine.state.hasAnimation(defaultAnimation)) {
         currentSpine.state.setAnimation(0, defaultAnimation, true);
-    } catch (e) {
+    }
+    else {
         currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
     }
 
@@ -326,6 +327,10 @@ function setupAnimationList(spineData) {
     renderToStage(currentSpine);
 }
 
+function animationOnProgress() {
+
+}
+
 function animationOnChange(list, trackNo, currentSpine) {
     list.onchange = () => {
         console.log(`Changing track No. ${trackNo}`);
@@ -339,6 +344,7 @@ function animationOnChange(list, trackNo, currentSpine) {
         currentSpine.skeleton.setToSetupPose();
         currentSpine.update(0);
         currentSpine.autoUpdate = true;
+        //slider.setAttribute("max", currentSpine.state.tracks[trackNo].animation.duration * 1000);
     }
 }
 
@@ -352,8 +358,8 @@ async function renderByDrop(dataAtlas, dataJson, dataTexture) {
     const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
     const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
     const spineData = spineJsonParser.readSkeletonData(rawJson);
-    currentSpine = new PIXI.spine.Spine(spineData);
-    renderToStage("wait");
+    let thisSpine = new PIXI.spine.Spine(spineData);
+    renderToStage(thisSpine);
 }
 
 function blobToBase64(blob) {
@@ -397,7 +403,6 @@ function renderToStage(currentSpine) {
         (app.screen.width - cont.width) * 0.5,
         (app.screen.height - cont.height) * 0.5
     );
-
 }
 
 function resetAllAnimation() {
