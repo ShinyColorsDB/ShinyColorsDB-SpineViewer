@@ -138,7 +138,7 @@ function testAndLoadDress(idolId, idolName) {
         });
     }
     else {
-        setupDressList(JSON.parse(resources[idolName].data));
+        setupDressList(JSON.parse(apiLoader.resources[idolName].data));
     }
 }
 
