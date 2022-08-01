@@ -9,9 +9,17 @@ div span {
 
 .form-select {
     padding: .5rem 2.25rem .375rem 1rem;
-    border-radius: .4rem;
-    box-shadow: 0 0 3pt 2pt #0e3155;
     outline: none;
+}
+
+.formL {
+    border-radius: .4rem, 0, 0, .4rem;
+    box-shadow: 0 0 3pt 0pt #0e3155;
+}
+
+.formR {
+    border-radius: 0, .4rem, .4rem, 0;
+    box-shadow: 0 0 3pt 0pt #0e3155;
 }
 
 select:focus {
@@ -31,17 +39,17 @@ select:focus {
 ::-webkit-scrollbar {
     width: 10px;
 }
-  
+
 /* Track */
 ::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
-  
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
     background: #888;
 }
-  
+
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: #555;

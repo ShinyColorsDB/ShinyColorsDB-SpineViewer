@@ -65,10 +65,8 @@ function init() {
 
     apiLoader
         .add("IdolList", "https://api.shinycolors.moe/spines/IdolList")
-        .add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
-        //.add("Version", "https://api.shinycolors.moe/spines/Version")
-        .load(function(loader, resources) {
-            onJsonLoaded(JSON.parse(resources.IdolList.data), JSON.parse(resources.UpdateLog.data));
+        .load(function (loader, resources) {
+            setupIdolList(JSON.parse(resources.IdolList.data));
         });
 
     const colorPicker = document.getElementById("colorPicker");
@@ -81,34 +79,6 @@ function init() {
     }
 }
 
-function onJsonLoaded(idolList, updateLog) {
-    setupUpdateLog(updateLog);
-    setupIdolList(idolList);
-}
-
-function setupUpdateLog(updateLog) {
-    let modal = document.getElementById("divModalBody");
-
-    updateLog.forEach(element => {
-        let divTitle = document.createElement("div");
-        divTitle.classList.add("p-1");
-        let divContent = document.createElement("p");
-        divContent.classList.add("p-3");
-
-        element.Content.forEach(e => {
-            let span = document.createElement("span");
-            span.textContent = e;
-            span.classList.add("text-info");
-            divContent.appendChild(span);
-            divContent.appendChild(document.createElement("br"));
-        });
-
-        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date)));
-        modal.appendChild(divContent);
-    });
-    document.getElementById('showLog').click();
-}
-
 function setupIdolList(idolInfo) {
     const idolList = document.getElementById("idolList");
     let idolId = 1, idolName = 'mano';
@@ -118,7 +88,7 @@ function setupIdolList(idolInfo) {
         const option = document.createElement("option");
         option.textContent = element.IdolName;
         option.value = element.IdolID;
-        if (index == 1) option.selected = true;
+        if (index === 1) option.selected = true;
         idolList.appendChild(option);
     });
 
@@ -254,7 +224,7 @@ function toggleTrackSelectList(toggle) {
         for (let k of [animationList2, animationList3, animationList4]) {
             k.classList.add("bg-secondary");
             k.disabled = true;
-        }        
+        }
     }
     else { //enable
         for (let k of [animationList2, animationList3, animationList4]) {
@@ -283,7 +253,7 @@ function setupAnimationList(spineData) {
     const defaultAnimation = "wait", noAnimation = "none";
 
     let currentSpine = new PIXI.spine.Spine(spineData);
-    
+
     try {
         currentSpine.skeleton.setSkinByName('normal');
     } catch (e) {
@@ -327,10 +297,6 @@ function setupAnimationList(spineData) {
     renderToStage(currentSpine);
 }
 
-function animationOnProgress() {
-
-}
-
 function animationOnChange(list, trackNo, currentSpine) {
     list.onchange = () => {
         console.log(`Changing track No. ${trackNo}`);
@@ -340,11 +306,10 @@ function animationOnChange(list, trackNo, currentSpine) {
         }
         else {
             currentSpine.state.setAnimation(trackNo, newAnimation, true);
-        }                
+        }
         currentSpine.skeleton.setToSetupPose();
         currentSpine.update(0);
         currentSpine.autoUpdate = true;
-        //slider.setAttribute("max", currentSpine.state.tracks[trackNo].animation.duration * 1000);
     }
 }
 
@@ -373,15 +338,14 @@ function blobToBase64(blob) {
 function renderToStage(currentSpine) {
 
     cont.removeChild(cont.children[0]);
-
     cont.addChild(currentSpine);
 
-    const localRect = currentSpine.getLocalBounds();
-    currentSpine.position.set(-localRect.x, -localRect.y);
-
     const dressType = document.getElementById("typeList").value;
+    const spineLocalBound = currentSpine.getLocalBounds();
 
-    let scale = 1;
+    currentSpine.position.set(-spineLocalBound.x, -spineLocalBound.y);
+
+    let scale = 0.9;
     switch (dressType) {
         case SML0:
             break;
@@ -390,19 +354,21 @@ function renderToStage(currentSpine) {
             break;
         case BIG0:
         case BIG1:
+            /*
             scale = Math.min(
                 app.view.width / currentSpine.spineData.width,
                 app.view.height / currentSpine.spineData.height
             ) * 0.85
             if (scale < 0.8) scale = 0.8;
+            */
             break;
     }
 
+    const contLocalBound = cont.getLocalBounds();
+
     cont.scale.set(scale);
-    cont.position.set(
-        (app.screen.width - cont.width) * 0.5,
-        (app.screen.height - cont.height) * 0.5
-    );
+    cont.pivot.set(contLocalBound.width / 2, contLocalBound.height / 2);
+    cont.position.set(app.view.width / 2, app.view.height / 2);
 }
 
 function resetAllAnimation() {
@@ -418,5 +384,4 @@ function resetAllAnimation() {
         k.value = "none";
         k.dispatchEvent(new Event("change"));
     }
-
 }

@@ -46,13 +46,13 @@
 
 <body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" onload="init();">
     <div class="d-none">
-        SC戳戳樂~ 這邊網羅了所有角色的衣服，就算你沒有那張卡也能舔老婆~ 
+        SC戳戳樂~ 這邊網羅了所有角色的衣服，就算你沒有那張卡也能舔老婆~
         shinycolors spine viewer, shinycolors live2d veiwer, 偶像大師閃耀色彩 live2d 資料網,
         偶像大師 閃耀色彩, 偶閃, spine, live2d, シャニーマス, アイドルマスタシャニカラーズ
         euphokumiko.iem06[at]nctu.edu.tw
     </div>
 
-    <div class="modal fade" id="divUpdateLog" tabindex="-1" role="dialog" aria-labelledby="divUpdateLogLabel"
+    <!--div class="modal fade" id="divUpdateLog" tabindex="-1" role="dialog" aria-labelledby="divUpdateLogLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -62,11 +62,6 @@
                         <span aria-hidden="false" class="text-primary"></span>
                     </button>
                 </div>
-                <div class="modal-body" id="divModalBody1">
-                    網站作者正在國軍online，更新會晚很多，請見諒 :( <br>
-                    Site author is currently in mandatory military service, updates will be late. Sorry for inconvience :( <br>
-                    このサイトの作者は義務兵役中です，更新が通常より遅くなります :( <br>
-                </div>
                 <div class="modal-body" id="divModalBody">
 
                 </div>
@@ -75,7 +70,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div-->
 
     <div class="modal fade" id="divThanks" tabindex="-1" role="dialog" aria-labelledby="divThanksLabel"
         aria-hidden="true">
@@ -154,14 +149,24 @@
             <select id="dressList" class="form-select" aria-label="Default select example"></select>
             <span>Type:</span>
             <select id="typeList" class="form-select" aria-label="Default select example"></select>
-            <span>Animation1:</span>
-            <select id="animationList1" class="form-select"></select>
-            <span>Animation2:</span>
-            <select id="animationList2" class="form-select"></select>
-            <span>Animation3:</span>
-            <select id="animationList3" class="form-select"></select>
-            <span>Animation4:</span>
-            <select id="animationList4" class="form-select"></select>
+            <div class="container">
+                <div class="row">
+                    <span class="col">Animation1:</span>
+                    <span class="col">Animation2:</span>
+                </div>
+                <div class="row">
+                    <select id="animationList1" class="form-select col formL"></select>
+                    <select id="animationList2" class="form-select col formR"></select>
+                </div>
+                <div class="row">
+                    <span class="col">Animation3:</span>
+                    <span class="col">Animation4:</span>
+                </div>
+                <div class="row">
+                    <select id="animationList3" class="form-select col formL"></select>
+                    <select id="animationList4" class="form-select col formR"></select>
+                </div>
+            </div>
             <input type="button" class="btn btn-primary mt-4" id="resetAnimation" value="Reset all animation">
 
             <span>Background Color:</span>
@@ -169,8 +174,8 @@
             <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2"
                 onclick="location.href = '../photoMode'" value="PhotoMode">
 
-            <input type="button" class="btn btn-primary mb-3" id="showLog" data-bs-toggle="modal"
-                data-bs-target="#divUpdateLog" value="Update Log">
+            <!--input type="button" class="btn btn-primary mb-3" id="showLog" data-bs-toggle="modal"
+                data-bs-target="#divUpdateLog" value="Update Log"-->
             <input type="button" class="btn btn-success mb-3" id="showThanks" data-bs-toggle="modal"
                 data-bs-target="#divThanks" value="Special Thanks">
         </div>
