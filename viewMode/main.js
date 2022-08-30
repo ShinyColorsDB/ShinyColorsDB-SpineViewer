@@ -64,9 +64,9 @@ function init() {
     app.stage.addChild(cont);
 
     apiLoader
-        .add("IdolList", "https://api.shinycolors.moe/spines/IdolList")
+        .add("idolList", "https://api.shinycolors.moe/spine/idollist")
         .load(function (loader, resources) {
-            setupIdolList(JSON.parse(resources.IdolList.data));
+            setupIdolList(JSON.parse(resources.idolList.data));
         });
 
     const colorPicker = document.getElementById("colorPicker");
@@ -86,15 +86,15 @@ function setupIdolList(idolInfo) {
 
     idolInfo.forEach((element, index) => {
         const option = document.createElement("option");
-        option.textContent = element.IdolName;
-        option.value = element.IdolID;
+        option.textContent = element.idolName;
+        option.value = element.idolId;
         if (index === 1) option.selected = true;
         idolList.appendChild(option);
     });
 
     idolList.onchange = () => {
         idolId = idolList.value;
-        idolName = idolInfo[idolId].Directory;
+        idolName = idolInfo[idolId].idolName;
         testAndLoadDress(idolId, idolName);
     };
 
@@ -103,7 +103,7 @@ function setupIdolList(idolInfo) {
 
 function testAndLoadDress(idolId, idolName) {
     if (!apiLoader.resources[idolName]) {
-        apiLoader.add(idolName, `https://api.shinycolors.moe/spines/dressList/${idolId}`).load(function(loader, resources) {
+        apiLoader.add(idolName, `https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).load(function(loader, resources) {
             setupDressList(JSON.parse(resources[idolName].data));
         });
     }
@@ -120,18 +120,18 @@ function setupDressList(idolDressList) {
     optGroup.label = "P_SSR";
 
     idolDressList.forEach((element, index) => {
-        if (element.DressType != lastType) {
+        if (element.dressType != lastType) {
             if (optGroup.childElementCount > 0) {
                 dressList.appendChild(optGroup);
             }
-            lastType = element.DressType;
+            lastType = element.dressType;
             optGroup = document.createElement('optgroup');
-            optGroup.label = element.DressType;
+            optGroup.label = element.dressType;
         }
         let option = document.createElement("option");
-        option.textContent = element.DressName;
+        option.textContent = element.dressName;
         option.setAttribute("value", index);
-        option.setAttribute("dressUUID", element.DressUUID);
+        option.setAttribute("dressUUID", element.dressUuid);
         optGroup.appendChild(option);
     });
     dressList.appendChild(optGroup);
@@ -153,28 +153,28 @@ function setupTypeList(dressObj) {
     let big0, big1, sml0, sml1;
     let flag_sml0 = false, flag_big0 = false,
         flag_sml1 = false, flag_big1 = false;
-    if (dressObj.Sml_Cloth0) {
+    if (dressObj.sml_Cloth0) {
         flag_sml0 = true;
         sml0 = document.createElement("option");
         sml0.textContent = "Q版_通常服";
         sml0.value = SML0;
         typeList.appendChild(sml0);
     }
-    if (dressObj.Sml_Cloth1) {
+    if (dressObj.sml_Cloth1) {
         flag_sml0 = true;
         sml1 = document.createElement("option");
         sml1.textContent = "Q版_演出服";
         sml1.value = SML1;
         typeList.appendChild(sml1);
     }
-    if (dressObj.Big_Cloth0) {
+    if (dressObj.big_Cloth0) {
         flag_big0 = true;
         big0 = document.createElement("option");
         big0.textContent = "一般_通常服";
         big0.value = BIG0;
         typeList.appendChild(big0);
     }
-    if (dressObj.Big_Cloth1) {
+    if (dressObj.big_Cloth1) {
         flag_big1 = true;
         big1 = document.createElement("option");
         big1.textContent = "一般_演出服";
@@ -213,7 +213,7 @@ function setupTypeList(dressObj) {
         testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("dressUUID"), dressType);
     };
 
-    testAndLoadAnimation(dressObj.DressUUID, dressType);
+    testAndLoadAnimation(dressObj.dressUuid, dressType);
 }
 
 function toggleTrackSelectList(toggle) {
