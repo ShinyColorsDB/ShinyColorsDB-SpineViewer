@@ -37,7 +37,7 @@ function dropHandler(event) {
         dropLoader
             .add("dropJson", pathJSON)
             .add("dropAtlas", pathAtlas)
-            .load(function (loader, resources) {
+            .load(function (_, resources) {
                 renderByDrop(resources.dropAtlas.data, JSON.parse(resources.dropJson.data), pathTexture);
             });
     }
@@ -210,7 +210,7 @@ function setupTypeList(dressObj) {
 
 function testAndLoadAnimation(uuid, type) {
     if (!app.loader.resources[`${uuid}/${type}`]) {
-        app.loader.add(`${uuid}/${type}`, `https://static.shinycolors.moe/spines/${uuid}/${type}/data.json`).load(function (loader, resources) {
+        app.loader.add(`${uuid}/${type}`, `https://static.shinycolors.moe/spines/${uuid}/${type}/data.json`).load(function (_, resources) {
             setupAnimationList(resources[`${uuid}/${type}`].spineData);
         });
     }
