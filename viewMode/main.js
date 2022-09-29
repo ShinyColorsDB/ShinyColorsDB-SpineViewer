@@ -326,14 +326,9 @@ function renderToStage(currentSpine) {
             scale = 2.5;
             break;
         case BIG0:
-        case BIG1:
-            /*
-            scale = Math.min(
-                app.view.width / currentSpine.spineData.width,
-                app.view.height / currentSpine.spineData.height
-            ) * 0.85
-            if (scale < 0.8) scale = 0.8;
-            */
+        case BIG1:            
+            scale = (app.view.height / currentSpine.spineData.height) * 0.9;
+            
             break;
     }
 
