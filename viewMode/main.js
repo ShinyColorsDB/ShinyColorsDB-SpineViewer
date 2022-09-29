@@ -64,7 +64,7 @@ function init() {
 
     apiLoader
         .add("idolList", "https://api.shinycolors.moe/spine/idollist")
-        .load(function (loader, resources) {
+        .load(function (_, resources) {
             setupIdolList(JSON.parse(resources.idolList.data));
         });
 
@@ -102,7 +102,7 @@ function setupIdolList(idolInfo) {
 
 function testAndLoadDress(idolId, idolName) {
     if (!apiLoader.resources[idolName]) {
-        apiLoader.add(idolName, `https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).load(function (loader, resources) {
+        apiLoader.add(idolName, `https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).load(function (_, resources) {
             setupDressList(JSON.parse(resources[idolName].data));
         });
     }
@@ -328,12 +328,10 @@ function renderToStage(currentSpine) {
         case BIG0:
         case BIG1:            
             scale = (app.view.height / currentSpine.spineData.height) * 0.9;
-            
             break;
     }
 
     const contLocalBound = cont.getLocalBounds();
-
     cont.scale.set(scale);
     cont.pivot.set(contLocalBound.width / 2, contLocalBound.height / 2);
     cont.position.set(app.view.width / 2, app.view.height / 2);
