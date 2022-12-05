@@ -68,8 +68,8 @@ function Init() {
 
     apiLoader
         .add("IdolList", "https://api.shinycolors.moe/spines/IdolList")
-        .add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
-        .add("Version", "https://api.shinycolors.moe/spines/Version")
+        //.add("UpdateLog", "https://api.shinycolors.moe/spines/UpdateLog")
+        //.add("Version", "https://api.shinycolors.moe/spines/Version")
         .load(OnJsonLoaded);
 
     CreateDefault();
@@ -111,31 +111,7 @@ function CreateDefault() {
         });
 }
 
-function SetupUpdateLog(updateLog) {
-    let modal = document.getElementById("divModalBody");
-
-    updateLog.forEach(element => {
-        let divTitle = document.createElement("div");
-        divTitle.classList.add("p-1");
-        let divContent = document.createElement("p");
-        divContent.classList.add("p-3");
-
-        element.Content.forEach(e => {
-            let span = document.createElement("span");
-            span.textContent = e;
-            span.classList.add("text-info");
-            divContent.appendChild(span);
-            divContent.appendChild(document.createElement("br"));
-        });
-
-        modal.appendChild(divTitle.appendChild(document.createTextNode(element.Date)));
-        modal.appendChild(divContent);
-    });
-    document.getElementById('showLog').click();
-}
-
-function OnJsonLoaded(loader, resources) {
-    SetupUpdateLog(JSON.parse(resources.UpdateLog.data));
+function OnJsonLoaded(_, resources) {
     SetupIdolList(JSON.parse(resources.IdolList.data));
 }
 
@@ -272,7 +248,7 @@ function SetupTypeList(dressInfo, dressID) {
 
 function TestAndLoadAnimation() {
     console.log("TestAndLoadAnimation");
-    const idolName = document.getElementById("idolList").options[document.getElementById("idolList").selectedIndex].getAttribute("idolName"), 
+    const idolName = document.getElementById("idolList").options[document.getElementById("idolList").selectedIndex].getAttribute("idolName"),
         dressUUID = document.getElementById("dressList").options[document.getElementById("dressList").selectedIndex].getAttribute("dressUUID"),
         dressType = document.getElementById("typeList").value;
 
@@ -307,7 +283,7 @@ function SetupAnimationList(animations) {
 }
 
 function AddToActiveList() {
-    const idolName = document.getElementById("idolList").getAttribute("idolName"), 
+    const idolName = document.getElementById("idolList").getAttribute("idolName"),
         dressUUID = document.getElementById("dressList").options[document.getElementById("dressList").selectedIndex].getAttribute("dressUUID"),
         dressName = document.getElementById("dressList").options[document.getElementById("dressList").selectedIndex].textContent,
         dressType = document.getElementById("typeList").value;

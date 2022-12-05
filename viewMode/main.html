@@ -75,6 +75,28 @@
         </div>
     </div>
 
+    <div class="modal fade" id="divRemoved" tabindex="-1" role="dialog" aria-labelledby="divRemovedLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divRemovedLabel">特別感謝</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divRemovedBody">
+                    <div class="text-primary text-center">Temporarily removed, will back until I have time.</div>
+                    <div class="text-primary text-center">暫時移除，直到我有空寫這鬼東西為止</div>
+                    <div class="text-primary text-center">一時的に削除される</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="divLicense" tabindex="-1" role="dialog" aria-labelledby="divLicenseLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -142,6 +164,20 @@
         </div>
     </div>
 
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="copied" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Copied!</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                <div class="text-primary text-center">Link is copied!</div>
+                <div class="text-primary text-center">連結已經複製到剪貼簿</div>
+                <div class="text-primary text-center">リンクはコピーされています</div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid d-flex p-0">
         <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark w-25 min-vh-100 d-inline-block" id="divSidebar">
             <span>Idol:</span>
@@ -157,13 +193,15 @@
 
             <span>Background Color:</span>
             <input type="color" class="mb-3 form-control w-100" id="colorPicker" />
-            <input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2"
-                onclick="location.href = '../photoMode'" value="PhotoMode">
-
-            <!--input type="button" class="btn btn-primary mb-3" id="showLog" data-bs-toggle="modal"
-                data-bs-target="#divUpdateLog" value="Update Log"-->
-            <input type="button" class="btn btn-success mb-3" id="showThanks" data-bs-toggle="modal"
+            <!--input type="button" class="btn btn-info mb-3 form-input w-100 pt-2 pb-2"
+                onclick="location.href = '../photoMode'" value="PhotoMode"-->
+            <input type="button" class="btn btn-info mb-3" id="showRemoved" data-bs-toggle="modal"
+                data-bs-target="#divRemoved" value="PhotoMode">
+            <input type="button" class="btn btn-info mb-3" id="showThanks" data-bs-toggle="modal"
                 data-bs-target="#divThanks" value="Special Thanks">
+
+            <input type="button" class="btn btn-success mb-3" id="copyToClipboard"
+                value="Share Current Spine!" onclick="copyLinkToClipboard()">
         </div>
         <canvas id="canvas" class="flex-column p-0 w-75 d-inline-block min-vh-100"></canvas>
 

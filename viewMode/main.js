@@ -2,6 +2,8 @@
 let app;
 const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
+//https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwqsjaflk&dressType=big_cloth0
+const urlParams = new URLSearchParams(window.location.search);
 
 function dropHandler(event) {
     event.preventDefault();
@@ -51,7 +53,20 @@ function dragOverHandler(event) {
     dropLoader.reset();
 }
 
+function toastInit() {
+    let toastTrigger = document.getElementById('copyToClipboard');
+    let toastLiveExample = document.getElementById('copied');
+    if (toastTrigger) {
+        toastTrigger.addEventListener('click', function () {
+            let toast = new bootstrap.Toast(toastLiveExample);
+
+            toast.show();
+        });
+    }
+}
+
 function init() {
+    toastInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
@@ -80,14 +95,17 @@ function init() {
 
 function setupIdolList(idolInfo) {
     const idolList = document.getElementById("idolList");
-    let idolId = 1, idolName = "mano";
+    let idolId = urlParams.has("idolId") ? Number(urlParams.get("idolId")) : 1,
+        idolName = idolInfo[idolId].idolName;
     idolList.innerHTML = "";
 
     idolInfo.forEach((element, index) => {
         const option = document.createElement("option");
         option.textContent = element.idolName;
         option.value = element.idolId;
-        if (index === 1) option.selected = true;
+        if (index === idolId) {
+            option.selected = true;
+        };
         idolList.appendChild(option);
     });
 
@@ -116,7 +134,8 @@ function setupDressList(idolDressList) {
     dressList.innerHTML = "";
 
     let lastType = "P_SSR", optGroup = document.createElement("optgroup");
-    optGroup.label = "P_SSR";
+        optGroup.label = "P_SSR";
+    let arrayOrder = 0;
 
     idolDressList.forEach((element, index) => {
         if (element.dressType != lastType) {
@@ -132,10 +151,13 @@ function setupDressList(idolDressList) {
         option.setAttribute("value", index);
         option.setAttribute("dressUUID", element.dressUuid);
         optGroup.appendChild(option);
+
+        if (urlParams.has("dressUuid") && urlParams.get("dressUuid") === element.dressUuid) {
+            arrayOrder = index;
+        }
     });
     dressList.appendChild(optGroup);
 
-    let arrayOrder = 0;
     dressList.onchange = () => {
         arrayOrder = dressList.value;
         setupTypeList(idolDressList[arrayOrder]);
@@ -181,21 +203,47 @@ function setupTypeList(dressObj) {
         typeList.appendChild(big1);
     }
 
-    if (flag_big0) {
-        dressType = BIG0;
-        big0.selected = true;
+    if (urlParams.has("dressType")
+        && (urlParams.get("dressType") === SML0
+            || urlParams.get("dressType") === SML1
+            || urlParams.get("dressType") === BIG0
+            || urlParams.get("dressType") === BIG1)) {
+
+        const typeFromUri = urlParams.get("dressType");
+        if (typeFromUri == SML0) {
+            dressType = SML0;
+            sml0.selected = true;
+        }
+        else if (typeFromUri == SML1) {
+            dressType = SML1;
+            sml1.selected = true;
+        }
+        else if (typeFromUri == BIG0) {
+            dressType = BIG0;
+            big0.selected = true;
+        }
+        else if (typeFromUri == BIG1) {
+            dressType = BIG1;
+            big1.selected = true;
+        }
     }
-    else if (flag_big1) {
-        dressType = BIG1;
-        big1.selected = true;
-    }
-    else if (flag_sml0) {
-        dressType = SML0;
-        sml0.selected = true;
-    }
-    else if (flag_sml1) {
-        dressType = SML1;
-        sml1.selected = true;
+    else {
+        if (flag_big0) {
+            dressType = BIG0;
+            big0.selected = true;
+        }
+        else if (flag_big1) {
+            dressType = BIG1;
+            big1.selected = true;
+        }
+        else if (flag_sml0) {
+            dressType = SML0;
+            sml0.selected = true;
+        }
+        else if (flag_sml1) {
+            dressType = SML1;
+            sml1.selected = true;
+        }
     }
 
     typeList.onchange = () => {
@@ -326,7 +374,7 @@ function renderToStage(currentSpine) {
             scale = 2.5;
             break;
         case BIG0:
-        case BIG1:            
+        case BIG1:
             scale = (app.view.height / currentSpine.spineData.height) * 0.9;
             break;
     }
@@ -355,4 +403,13 @@ function resetAllAnimation() {
         first.checked = true;
         first.dispatchEvent(new Event("change"));
     }
+}
+
+function copyLinkToClipboard() {
+    const idolId = document.getElementById("idolList").value;
+    const dressList = document.getElementById("dressList");
+    const dressType = document.getElementById("typeList").value;
+    const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
+    const link = `https://spine.shinycolors.moe/viewMode?idolId=${idolId}&dressUuid=${dressUuid}&dressType=${dressType}`;
+    navigator.clipboard.writeText(link);
 }
