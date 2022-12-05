@@ -2,7 +2,7 @@
 let app;
 const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
-//https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwqsjaflk&dressType=big_cloth0
+//https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwq&dressType=big_cloth0
 const urlParams = new URLSearchParams(window.location.search);
 
 function dropHandler(event) {
@@ -152,7 +152,7 @@ function setupDressList(idolDressList) {
         option.setAttribute("dressUUID", element.dressUuid);
         optGroup.appendChild(option);
 
-        if (urlParams.has("dressUuid") && urlParams.get("dressUuid") === element.dressUuid) {
+        if (urlParams.has("dressUuid") && element.dressUuid.match(urlParams.get("dressUuid"))) {
             arrayOrder = index;
         }
     });
@@ -410,6 +410,6 @@ function copyLinkToClipboard() {
     const dressList = document.getElementById("dressList");
     const dressType = document.getElementById("typeList").value;
     const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
-    const link = `https://spine.shinycolors.moe/viewMode?idolId=${idolId}&dressUuid=${dressUuid}&dressType=${dressType}`;
+    const link = `https://spine.shinycolors.moe/?idolId=${idolId}&dressUuid=${dressUuid.slice(0, 6)}&dressType=${dressType}`;
     navigator.clipboard.writeText(link);
 }
