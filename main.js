@@ -1,5 +1,5 @@
 "use strict";
-let app;
+let app, urlFlag = false;
 const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 //https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwq&dressType=big_cloth0
@@ -152,7 +152,7 @@ function setupDressList(idolDressList) {
         option.setAttribute("dressUUID", element.dressUuid);
         optGroup.appendChild(option);
 
-        if (urlParams.has("dressUuid") && element.dressUuid.match(urlParams.get("dressUuid"))) {
+        if (urlParams.has("dressUuid") && element.dressUuid.match(urlParams.get("dressUuid")) && !urlFlag) {
             arrayOrder = index;
         }
     });
@@ -207,7 +207,8 @@ function setupTypeList(dressObj) {
         && (urlParams.get("dressType") === SML0
             || urlParams.get("dressType") === SML1
             || urlParams.get("dressType") === BIG0
-            || urlParams.get("dressType") === BIG1)) {
+            || urlParams.get("dressType") === BIG1)
+        && !urlFlag) {
 
         const typeFromUri = urlParams.get("dressType");
         if (typeFromUri == SML0) {
@@ -226,6 +227,7 @@ function setupTypeList(dressObj) {
             dressType = BIG1;
             big1.selected = true;
         }
+        urlFlag = true;
     }
     else {
         if (flag_big0) {
