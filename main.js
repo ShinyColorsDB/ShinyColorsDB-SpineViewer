@@ -5,6 +5,8 @@ const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big
 //https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwq&dressType=big_cloth0
 const urlParams = new URLSearchParams(window.location.search);
 
+PIXI.utils.skipHello();
+
 function dropHandler(event) {
     event.preventDefault();
     let pathJSON, pathAtlas, pathTexture;
@@ -91,6 +93,20 @@ function init() {
     resetBtn.onclick = () => {
         resetAllAnimation();
     }
+
+    _hello();
+}
+
+function _hello() {
+    const log = [
+        `\n\n %c  %c   ShinyColors Spine Viewer   %c  %c  https://github.com/ShinyColorsDB/ShinyColorsDB-SpineViewer  %c \n\n`,
+        'background: #28de10; padding:5px 0;',
+        'color: #28de10; background: #030307; padding:5px 0;',
+        'background: #28de10; padding:5px 0;',
+        'background: #5eff84; padding:5px 0;',
+        'background: #28de10; padding:5px 0;',
+    ];
+    console.log(...log);
 }
 
 function setupIdolList(idolInfo) {
