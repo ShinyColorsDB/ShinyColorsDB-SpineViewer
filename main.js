@@ -68,13 +68,19 @@ function toastInit() {
 }
 
 function init() {
+    if (!PIXI.utils.isWebGLSupported()) {
+        const hardwareAccel = new bootstrap.Modal(document.getElementById("divWebGL"));
+        hardwareAccel.toggle();
+        console.log('WebGL is not supported in this browser.');
+    }
+
     toastInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
         view: canvas,
-        width: canvas.clientWidth,
-        height: canvas.clientHeight
+        width: canvas.clientWidth - 1,
+        height: canvas.clientHeight - 1
     });
 
     app.stage.addChild(cont);
@@ -132,6 +138,21 @@ function setupIdolList(idolInfo) {
     };
 
     testAndLoadDress(idolId, idolName);
+}
+
+function testAndLoadPreset(idolId) {
+    if (!apiLoader.resources[`preset${idolId}`]) {
+        apiLoader.add(`preset${idolId}`, `https://api.shinycolors.moe/spine/spinepreset?idolId=${idolId}`).load(function (_, resources) {
+            setupPreset(JSON.parse(resources[`preset${idolId}`].data));
+        });
+    }
+    else {
+        setupPreset(JSON.parse(apiLoader.resources[`preset${idolId}`]));
+    }
+}
+
+function setupPreset(presetList) {
+
 }
 
 function testAndLoadDress(idolId, idolName) {
