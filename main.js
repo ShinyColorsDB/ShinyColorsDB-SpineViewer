@@ -452,3 +452,33 @@ function copyLinkToClipboard() {
     const link = `https://spine.shinycolors.moe/?idolId=${idolId}&dressUuid=${dressUuid.slice(0, 6)}&dressType=${dressType}`;
     navigator.clipboard.writeText(link);
 }
+
+function saveImage() {
+    const renderer = app.renderer;
+    renderer.render(app.stage);
+    const dataURL = renderer.view.toDataURL("image/png");
+    const anchor = document.createElement('a');
+    const dressList = document.getElementById("dressList");
+    const dressType = document.getElementById("typeList").value;
+    const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
+    anchor.download = `${dressUuid.slice(0, 6)}-${dressType}.png`;
+    anchor.href = dataURL;
+    // Trigger a click event on the anchor element to initiate the download
+    anchor.click();
+    return;
+    app.view.toBlob(function (blob) {
+        const anchor = document.createElement('a');
+        const dressList = document.getElementById("dressList");
+        const dressType = document.getElementById("typeList").value;
+        const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
+        anchor.download = `${dressUuid.slice(0, 6)}-${dressType}.png`;
+        const url = URL.createObjectURL(blob);
+        anchor.href = url;
+
+        // Trigger a click event on the anchor element to initiate the download
+        anchor.click();
+
+        // Clean up the URL object
+        URL.revokeObjectURL(url);
+    });
+}

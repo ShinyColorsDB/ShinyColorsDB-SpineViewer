@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+
+    <head>
+        <meta charset="utf-8">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+        <!-- Cloudflare Web Analytics -->
+        <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+            data-cf-beacon='{"token": "3e38e18902dc4c00ad682d502f7f8b3c"}'></script>
+        <!-- End Cloudflare Web Analytics -->
+
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="./style.css" />
+
+        <link rel="shortcut icon" href="./assets/favicon.ico" />
+        <link rel="bookmark" href="./assets/favicon.ico" />
+
+        <script src="https://pixijs.download/v5.3.10/pixi.min.js"></script>
+        <script src="https://pixijs.download/v5.3.10/pixi-legacy.min.js"></script>
+        <script src="./pixi-spine.js"></script>
+
+        <!-- Primary Meta Tags -->
+        <title>~ ShinyColors 戳戳樂 ~</title>
+        <meta name="title" content="ShinyColors Spine Viewer">
+        <meta name="description" content="一個可以讓你戳老婆的奇怪檢視器。A fan made website that renders spine for all costumes.ゲームに登場するすべてのキャラを閲覧できるサイト">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://spine.shinycolors.moe/">
+        <meta property="og:title" content="ShinyColors Spine Viewer">
+        <meta property="og:description" content="一個可以讓你戳老婆的奇怪檢視器。A fan made website that renders spine for all costumes.ゲームに登場するすべてのキャラを閲覧できるサイト">
+        <meta property="og:image" content="https://spine.shinycolors.moe/assets/preview.png">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://spine.shinycolors.moe/">
+        <meta property="twitter:title" content="ShinyColors Spine Viewer">
+        <meta property="twitter:description" content="一個可以讓你戳老婆的奇怪檢視器。A fan made website that renders spine for all costumes.ゲームに登場するすべてのキャラを閲覧できるサイト">
+        <meta property="twitter:image" content="https://spine.shinycolors.moe/assets/preview.png">
+
+        <script src="./main.js"></script>
+        <!--alstroemeria283pro.11[at]gmail.com"-->
+    </head>
+
+    <body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);" onload="init();" class="d-flex flex-column vh-100">
+        <div class="d-none">
+            SC戳戳樂~ 這邊網羅了所有角色的衣服，就算你沒有那張卡也能舔老婆~
+            shinycolors spine viewer, シャニカラーズ コスチューム, 偶像大師閃耀色彩 spine 資料網,
+            偶像大師 閃耀色彩, 偶閃, spine, シャニーマス, アイドルマスター シャニカラーズ
+            alstroemeria283pro.11[at]gmail.com
+        </div>
+
+        <div class="modal fade" id="divThanks" tabindex="-1" role="dialog" aria-labelledby="divThanksLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="divThanksLabel">特別感謝</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="false" class="text-primary"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="divModalBody">
+                        <span class="text-primary">技術諮詢</span>
+                        <div class="ms-2">TWY</div>
+                        <span class="text-primary">爆肝小夥伴</span>
+                        <div class="ms-2">木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="divPreset" tabindex="-1" role="dialog" aria-labelledby="divPresetLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="divPresetLabel">Preset Action</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="false" class="text-primary"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="divPresetBody">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="divLicense" tabindex="-1" role="dialog" aria-labelledby="divLicenseLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="divLicenseLabel">LICENSE</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="false" class="text-primary"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="divLicenseBody">
+                        Spine Runtimes License Agreement <br>
+                        Last updated January 1, 2020. Replaces all prior versions.<br>
+
+                        Copyright (c) 2013-2020, Esoteric Software LLC<br>
+
+                        Integration of the Spine Runtimes into software or otherwise creating derivative works of the
+                        Spine<br>
+                        Runtimes is permitted under the terms and conditions of Section 2 of the Spine Editor License<br>
+                        Agreement:<br>
+                        http://esotericsoftware.com/spine-editor-license<br>
+                        <br>
+                        Otherwise, it is permitted to integrate the Spine Runtimes into software or otherwise create<br>
+                        derivative works of the Spine Runtimes (collectively, "Products"), provided that each user of
+                        the<br>
+                        Products must obtain their own Spine Editor license and redistribution of the Products in any
+                        form<br>
+                        must include this license and copyright notice.<br>
+                        <br>
+                        THE SPINE RUNTIMES ARE PROVIDED BY ESOTERIC SOFTWARE LLC "AS IS" AND ANY EXPRESS OR IMPLIED<br>
+                        WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+                        FOR<br>
+                        A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL ESOTERIC SOFTWARE LLC BE LIABLE FOR ANY<br>
+                        DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT<br>
+                        LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS INTERRUPTION, OR LOSS OF USE,<br>
+                        DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT<br>
+                        LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE<br>
+                        SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.<br>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="divAnimation" tabindex="-1" role="dialog" aria-labelledby="divAnimationLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content container">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="divAnimationLabel">Animation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="false" class="text-primary"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body row" id="divAnimationBody">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="resetAnimation">リセット</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="divWebGL" tabindex="-1" role="dialog" aria-labelledby="divWebGLLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content container">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="divWebGLLabel">Legacy Mode Detected</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="false" class="text-primary"></span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="divWebGLBody">
+                        <div class="text-primary text-center">Hardware acceleration is required for PIXI.js to run in WebGL mode, please enable it in your browser.</div>
+                        <div class="text-primary text-center">PIXI.js 需要瀏覽器啟用硬體加速才能正常運作，請於設定中啟用</div>
+                        <div class="text-primary text-center">ブラウザの設定でハードウェアアクセラレーションを有効にしてください。</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="position-fixed top-0 start-50 translate-middle-x p-3">
+            <div id="copied" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Copied!</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <div class="text-primary text-center">Link is copied!</div>
+                    <div class="text-primary text-center">連結已經複製到剪貼簿</div>
+                    <div class="text-primary text-center">リンクはコピーされています</div>
+                </div>
+            </div>
+        </div>
+
+        <main class="flex-shrink-0 w-100 h-100">
+            <div class="container p-0 d-flex w-100 h-100">
+                <canvas id="canvas"></canvas>
+            </div>
+        </main>
+
+        <div class="offcanvas offcanvas-start p-3 bg-dark" id="menuOffCanvas">
+            <span>Idol:</span>
+            <select id="idolList" class="form-select" aria-label="Default select example"></select>
+            <span>Dress:</span>
+            <select id="dressList" class="form-select" aria-label="Default select example"></select>
+            <span>Type:</span>
+            <select id="typeList" class="form-select" aria-label="Default select example"></select>
+            <span>Animation:</span>
+            <input type="button" class="btn btn-primary" id="animationList" value="AnimationList" data-bs-toggle="modal"
+                data-bs-target="#divAnimation">
+
+            <span>Background Color:</span>
+            <input type="color" class="mb-3 form-control w-100" id="colorPicker" />
+
+            <a href="https://shinycolors.moe" class="btn btn-info mb-3">ShinyColors Database</a>
+            <input type="button" class="btn btn-info mb-3" id="showThanks" data-bs-toggle="modal"
+                data-bs-target="#divThanks" value="Special Thanks">
+
+            <input type="button" class="btn btn-secondary bottom-0" data-bs-toggle="offcanvas"
+                data-bs-target="#menuOffCanvas" value="back">
+        </div>
+
+        <footer class="footer mt-auto py-3 bg-dark w-100 position-absolute bottom-0 start-50 translate-middle-x">
+            <div class="container">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#menuOffCanvas" aria-controls="offcanvasExample">
+                    <svg viewBox="0 0 100 80" width="20" height="20">
+                        <rect width="80" height="10"></rect>
+                        <rect y="30" width="80" height="10"></rect>
+                        <rect y="60" width="80" height="10"></rect>
+                    </svg>
+                    menu
+                </button>
+                <button class="btn btn-secondary" type="button" id="copyToClipboard" onclick="copyLinkToClipboard()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Communication / Share_Android"> <path id="Vector" d="M9 13.5L15 16.5M15 7.5L9 10.5M18 21C16.3431 21 15 19.6569 15 18C15 16.3431 16.3431 15 18 15C19.6569 15 21 16.3431 21 18C21 19.6569 19.6569 21 18 21ZM6 15C4.34315 15 3 13.6569 3 12C3 10.3431 4.34315 9 6 9C7.65685 9 9 10.3431 9 12C9 13.6569 7.65685 15 6 15ZM18 9C16.3431 9 15 7.65685 15 6C15 4.34315 16.3431 3 18 3C19.6569 3 21 4.34315 21 6C21 7.65685 19.6569 9 18 9Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                    share
+                </button>
+                <button class="btn btn-secondary" type="button" id="download" onclick="saveImage()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title></title> <g id="Complete"> <g id="download"> <g> <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path> <g> <polyline data-name="Right" fill="none" id="Right-2" points="7.9 12.3 12 16.3 16.1 12.3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12" y1="2.7" y2="14.2"></line> </g> </g> </g> </g> </g></svg>
+                    download
+                </button>
+            </div>
+        </footer>
+
+        <!--div class="container-fluid row m-0 p-0 vh-100 vw-100">
+        <div class="d-flex flex-column bg-dark h-100 col-lg-3" id="divSidebar">
+            <span>Idol:</span>
+            <select id="idolList" class="form-select" aria-label="Default select example"></select>
+            <span>Dress:</span>
+            <select id="dressList" class="form-select" aria-label="Default select example"></select>
+            <span>Type:</span>
+            <select id="typeList" class="form-select" aria-label="Default select example"></select>
+            <span>Animation:</span>
+            <input type="button" class="btn btn-primary" id="animationList" value="AnimationList" data-bs-toggle="modal"
+                data-bs-target="#divAnimation">
+
+
+            <span>Background Color:</span>
+            <input type="color" class="mb-3 form-control w-100" id="colorPicker" />
+
+            <a href="https://shinycolors.moe" class="btn btn-info mb-3">ShinyColors Database</a>
+            <input type="button" class="btn btn-info mb-3" id="showThanks" data-bs-toggle="modal"
+                data-bs-target="#divThanks" value="Special Thanks">
+
+            <input type="button" class="btn btn-success mb-3" id="copyToClipboard"
+                value="Share Current Spine!" onclick="copyLinkToClipboard()">
+        </div>
+        <div class="p-0 col-lg-9 d-flex">
+            <canvas id="canvas" width="1136" height="640" class="img-fluid"></canvas>
+        </div>
+
+    </div-->
+
+    </body>
+
+</html>
