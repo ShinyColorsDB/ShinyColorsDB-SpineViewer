@@ -1,11 +1,13 @@
 "use strict";
 let app, urlFlag = false;
-const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container({transparent: true});
+const dropLoader = PIXI.Assets, cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
-//https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwq&dressType=big_cloth0
 const urlParams = new URLSearchParams(window.location.search);
 
-PIXI.utils.skipHello();
+const idolMap = new Map();
+const spineMap = new Map();
+
+PIXI.settings.RENDER_OPTIONS.hello = false;
 
 function dropHandler(event) {
     event.preventDefault();
@@ -71,7 +73,7 @@ function toMobileUI() {
     window.location.href = "https://mspine.shinycolors.moe";
 }
 
-function init() {
+async function init() {
     if (!PIXI.utils.isWebGLSupported()) {
         const hardwareAccel = new bootstrap.Modal(document.getElementById("divWebGL"));
         hardwareAccel.toggle();
@@ -94,12 +96,6 @@ function init() {
 
     app.stage.addChild(cont);
 
-    apiLoader
-        .add("idolList", "https://api.shinycolors.moe/spine/idollist")
-        .load(function (_, resources) {
-            setupIdolList(JSON.parse(resources.idolList.data));
-        });
-
     const colorPicker = document.getElementById("colorPicker");
     colorPicker.onchange = (event) => {
         app.renderer.backgroundColor = String(event.target.value).replace(/#/, "0X");
@@ -108,6 +104,10 @@ function init() {
     resetBtn.onclick = () => {
         resetAllAnimation();
     }
+
+    fetch("https://api.shinycolors.moe/spine/idollist").then(async (response) => {
+        setupIdolList(await response.json());
+    });
 
     _hello();
 }
@@ -148,7 +148,7 @@ function setupIdolList(idolInfo) {
 
     testAndLoadDress(idolId, idolName);
 }
-
+/*
 function testAndLoadPreset(idolId) {
     if (!apiLoader.resources[`preset${idolId}`]) {
         apiLoader.add(`preset${idolId}`, `https://api.shinycolors.moe/spine/spinepreset?idolId=${idolId}`).load(function (_, resources) {
@@ -159,19 +159,20 @@ function testAndLoadPreset(idolId) {
         setupPreset(JSON.parse(apiLoader.resources[`preset${idolId}`]));
     }
 }
-
+*/
 function setupPreset(presetList) {
 
 }
 
 function testAndLoadDress(idolId, idolName) {
-    if (!apiLoader.resources[idolName]) {
-        apiLoader.add(idolName, `https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).load(function (_, resources) {
-            setupDressList(JSON.parse(resources[idolName].data));
+    if (!idolMap.has(idolName)) {
+        fetch(`https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).then(async (response) => {
+            idolMap.set(idolName, await response.json());
+            setupDressList(idolMap.get(idolName));
         });
     }
     else {
-        setupDressList(JSON.parse(apiLoader.resources[idolName].data));
+        setupDressList(idolMap.get(idolName));
     }
 }
 
@@ -305,13 +306,15 @@ function setupTypeList(dressObj) {
 }
 
 function testAndLoadAnimation(uuid, type) {
-    if (!app.loader.resources[`${uuid}/${type}`]) {
-        app.loader.add(`${uuid}/${type}`, `https://static.shinycolors.moe/spines/${uuid}/${type}/data.json`).load(function (_, resources) {
-            setupAnimationList(resources[`${uuid}/${type}`].spineData);
+    if (!spineMap.has(`${uuid}/${type}`)) {
+        PIXI.Assets.load(`https://static.shinycolors.moe/spines/${uuid}/${type}/data.json`).then((resource) => {
+            const waifu = resource.spineData;
+            spineMap.set(`${uuid}/${type}`, waifu);
+            setupAnimationList(waifu);
         });
     }
     else {
-        setupAnimationList(app.loader.resources[`${uuid}/${type}`].spineData);
+        setupAnimationList(spineMap.get(`${uuid}/${type}`));
     }
 }
 
