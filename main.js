@@ -1,6 +1,6 @@
 "use strict";
 let app, urlFlag = false;
-const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container();
+const apiLoader = new PIXI.Loader(), dropLoader = new PIXI.Loader(), cont = new PIXI.Container({transparent: true});
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 //https://spine.shinycolors.moe/viewMode?idolId=1&dressUuid=safuwq&dressType=big_cloth0
 const urlParams = new URLSearchParams(window.location.search);
@@ -67,11 +67,20 @@ function toastInit() {
     }
 }
 
+function toMobileUI() {
+    window.location.href = "https://mspine.shinycolors.moe";
+}
+
 function init() {
     if (!PIXI.utils.isWebGLSupported()) {
         const hardwareAccel = new bootstrap.Modal(document.getElementById("divWebGL"));
         hardwareAccel.toggle();
         console.log('WebGL is not supported in this browser.');
+    }
+
+    if (/(Android|iPhone|iPad)/i.test(navigator.userAgent) && !window.location.href.match(/mspine/)) {
+        const mobileWarning = new bootstrap.Modal(document.getElementById("divMobile"));
+        mobileWarning.toggle();
     }
 
     toastInit();
@@ -80,7 +89,7 @@ function init() {
     app = new PIXI.Application({
         view: canvas,
         width: canvas.clientWidth - 1,
-        height: canvas.clientHeight - 1
+        height: canvas.clientHeight - 1,
     });
 
     app.stage.addChild(cont);
@@ -453,32 +462,16 @@ function copyLinkToClipboard() {
     navigator.clipboard.writeText(link);
 }
 
-function saveImage() {
+async function saveImage() {
     const renderer = app.renderer;
-    renderer.render(app.stage);
-    const dataURL = renderer.view.toDataURL("image/png");
+    const image = await renderer.extract.image(cont);
+
     const anchor = document.createElement('a');
     const dressList = document.getElementById("dressList");
     const dressType = document.getElementById("typeList").value;
     const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
     anchor.download = `${dressUuid.slice(0, 6)}-${dressType}.png`;
-    anchor.href = dataURL;
+    anchor.href = image.src;
     // Trigger a click event on the anchor element to initiate the download
     anchor.click();
-    return;
-    app.view.toBlob(function (blob) {
-        const anchor = document.createElement('a');
-        const dressList = document.getElementById("dressList");
-        const dressType = document.getElementById("typeList").value;
-        const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
-        anchor.download = `${dressUuid.slice(0, 6)}-${dressType}.png`;
-        const url = URL.createObjectURL(blob);
-        anchor.href = url;
-
-        // Trigger a click event on the anchor element to initiate the download
-        anchor.click();
-
-        // Clean up the URL object
-        URL.revokeObjectURL(url);
-    });
 }

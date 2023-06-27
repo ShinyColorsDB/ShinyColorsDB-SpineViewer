@@ -189,6 +189,29 @@
         </div>
     </div>
 
+    <div class="modal fade" id="divMobile" tabindex="-1" role="dialog" aria-labelledby="divMobileLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content container">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="divMobileLabel">Mobile Device Detected</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="false" class="text-primary"></span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divMobileBody">
+                    <div class="text-primary text-center">Mobile Device Detected, redirect to mobile UI?</div>
+                    <div class="text-primary text-center">是否要前往移動端網頁介面?</div>
+                    <div class="text-primary text-center">モバイルデバイスが検出されました。モバイル用のUIにリダイレクトしますか？</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="toMobileUI()">Yes</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="position-fixed bottom-0 end-0" style="z-index: 11">
         <div id="copied" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
