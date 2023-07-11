@@ -106,7 +106,12 @@ async function init() {
     }
 
     fetch("https://api.shinycolors.moe/spine/idollist").then(async (response) => {
-        setupIdolList(await response.json());
+        const idolInfo = await response.json();
+        const idolInfoMap = new Map();
+        idolInfo.forEach((element) => {
+            idolInfoMap.set(element.idolId, element);
+        });
+        setupIdolList(idolInfoMap);
     });
 
     _hello();
@@ -127,14 +132,14 @@ function _hello() {
 function setupIdolList(idolInfo) {
     const idolList = document.getElementById("idolList");
     let idolId = urlParams.has("idolId") ? Number(urlParams.get("idolId")) : 1,
-        idolName = idolInfo[idolId].idolName;
+        idolName = idolInfo.get(idolId).idolName;
     idolList.innerHTML = "";
 
     idolInfo.forEach((element, index) => {
         const option = document.createElement("option");
         option.textContent = element.idolName;
         option.value = element.idolId;
-        if (index === idolId) {
+        if (element.idolId === idolId) {
             option.selected = true;
         };
         idolList.appendChild(option);
@@ -142,7 +147,7 @@ function setupIdolList(idolInfo) {
 
     idolList.onchange = () => {
         idolId = idolList.value;
-        idolName = idolInfo[idolId].idolName;
+        idolName = idolInfo.get(Number(idolId)).idolName;
         testAndLoadDress(idolId, idolName);
     };
 
@@ -362,7 +367,7 @@ function setupAnimationList(spineData) {
         div.appendChild(input);
         div.appendChild(label);
 
-        div.classList.add("col-md-4", "col-lg-3", "col-sm-6", "form-check");
+        div.classList.add("col-6", "form-check");
         animationList.appendChild(div);
     }
 

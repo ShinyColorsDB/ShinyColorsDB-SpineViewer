@@ -146,23 +146,20 @@
         </div>
     </div>
 
-    <div class="modal fade" id="divAnimation" tabindex="-1" role="dialog" aria-labelledby="divAnimationLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-            <div class="modal-content container">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="divAnimationLabel">Animation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="false" class="text-primary"></span>
-                    </button>
-                </div>
-                <div class="modal-body row" id="divAnimationBody">
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="resetAnimation">リセット</button>
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
-                </div>
+    <div class="offcanvas offcanvas-start bg-secondary d-flex justify-content-center" id="divAnimation" tabindex="-1" role="dialog" aria-labelledby="divAnimationLabel"
+        aria-hidden="true" data-bs-backdrop="false">
+        <div class="offcanvas-header pt-2 pb-2">
+            <h5 class="offcanvas-title" id="divAnimationLabel">Animation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
+                <span aria-hidden="false" class="text-primary"></span>
+            </button>
+        </div>
+        <div class="offcanvas-body pt-0">
+            <div class="row" id="divAnimationBody"></div>
+            <div class="container">
+                <button type="button" class="btn btn-danger w-100" id="resetAnimation">リセット</button>
+                <button type="button" class="btn btn-primary w-100" data-bs-toggle="offcanvas"
+                    data-bs-target="#divAnimation">閉じる</button>
             </div>
         </div>
     </div>
@@ -235,7 +232,7 @@
             <span>Type:</span>
             <select id="typeList" class="form-select" aria-label="Default select example"></select>
             <span>Animation:</span>
-            <input type="button" class="btn btn-primary" id="animationList" value="AnimationList" data-bs-toggle="modal"
+            <input type="button" class="btn btn-primary" id="animationList" value="AnimationList" data-bs-toggle="offcanvas"
                 data-bs-target="#divAnimation">
 
 

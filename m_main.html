@@ -146,27 +146,6 @@
             </div>
         </div>
 
-        <div class="modal fade" id="divAnimation" tabindex="-1" role="dialog" aria-labelledby="divAnimationLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                <div class="modal-content container">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="divAnimationLabel">Animation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="false" class="text-primary"></span>
-                        </button>
-                    </div>
-                    <div class="modal-body row" id="divAnimationBody">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" id="resetAnimation">リセット</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">閉じる</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="modal fade" id="divWebGL" tabindex="-1" role="dialog" aria-labelledby="divWebGLLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
@@ -209,6 +188,24 @@
             </div>
         </main>
 
+        <div class="offcanvas offcanvas-start bg-secondary d-flex justify-content-center" id="divAnimation" tabindex="-1" role="dialog" aria-labelledby="divAnimationLabel"
+            aria-hidden="true" data-bs-backdrop="false">
+            <div class="offcanvas-header pt-2 pb-2">
+                <h5 class="offcanvas-title" id="divAnimationLabel">Animation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">
+                    <span aria-hidden="false" class="text-primary"></span>
+                </button>
+            </div>
+            <div class="offcanvas-body pt-0">
+                <div class="row" id="divAnimationBody"></div>
+                <div class="container">
+                    <button type="button" class="btn btn-danger w-100" id="resetAnimation">リセット</button>
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="offcanvas"
+                        data-bs-target="#divAnimation">閉じる</button>
+                </div>
+            </div>
+        </div>
+
         <div class="offcanvas offcanvas-start p-3 bg-dark" id="menuOffCanvas">
             <span>Idol:</span>
             <select id="idolList" class="form-select" aria-label="Default select example"></select>
@@ -217,7 +214,7 @@
             <span>Type:</span>
             <select id="typeList" class="form-select" aria-label="Default select example"></select>
             <span>Animation:</span>
-            <input type="button" class="btn btn-primary" id="animationList" value="AnimationList" data-bs-toggle="modal"
+            <input type="button" class="btn btn-primary" id="animationList" value="AnimationList" data-bs-toggle="offcanvas"
                 data-bs-target="#divAnimation">
 
             <span>Background Color:</span>
@@ -243,11 +240,14 @@
                     menu
                 </button>
                 <button class="btn btn-secondary" type="button" id="copyToClipboard" onclick="copyLinkToClipboard()">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Communication / Share_Android"> <path id="Vector" d="M9 13.5L15 16.5M15 7.5L9 10.5M18 21C16.3431 21 15 19.6569 15 18C15 16.3431 16.3431 15 18 15C19.6569 15 21 16.3431 21 18C21 19.6569 19.6569 21 18 21ZM6 15C4.34315 15 3 13.6569 3 12C3 10.3431 4.34315 9 6 9C7.65685 9 9 10.3431 9 12C9 13.6569 7.65685 15 6 15ZM18 9C16.3431 9 15 7.65685 15 6C15 4.34315 16.3431 3 18 3C19.6569 3 21 4.34315 21 6C21 7.65685 19.6569 9 18 9Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Communication / Share_Android"> <path id="Vector"
+                                    d="M9 13.5L15 16.5M15 7.5L9 10.5M18 21C16.3431 21 15 19.6569 15 18C15 16.3431 16.3431 15 18 15C19.6569 15 21 16.3431 21 18C21 19.6569 19.6569 21 18 21ZM6 15C4.34315 15 3 13.6569 3 12C3 10.3431 4.34315 9 6 9C7.65685 9 9 10.3431 9 12C9 13.6569 7.65685 15 6 15ZM18 9C16.3431 9 15 7.65685 15 6C15 4.34315 16.3431 3 18 3C19.6569 3 21 4.34315 21 6C21 7.65685 19.6569 9 18 9Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g>
+                        </g></svg>
                     share
                 </button>
                 <button class="btn btn-secondary" type="button" id="download" onclick="saveImage()">
-                    <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title></title> <g id="Complete"> <g id="download"> <g> <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path> <g> <polyline data-name="Right" fill="none" id="Right-2" points="7.9 12.3 12 16.3 16.1 12.3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12" y1="2.7" y2="14.2"></line> </g> </g> </g> </g> </g></svg>
+                    <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title></title> <g id="Complete"> <g id="download"> <g> <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path> <g> <polyline
+                                                data-name="Right" fill="none" id="Right-2" points="7.9 12.3 12 16.3 16.1 12.3" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12" y1="2.7" y2="14.2"></line> </g> </g> </g> </g> </g></svg>
                     save
                 </button>
             </div>
