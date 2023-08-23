@@ -202,6 +202,9 @@ function setupDressList(idolDressList) {
         option.textContent = element.dressName;
         option.setAttribute("value", index);
         option.setAttribute("dressUUID", element.dressUuid);
+        if (!element.exist) {
+            option.setAttribute("disabled", true);
+        }
         optGroup.appendChild(option);
 
         if (urlParams.has("dressUuid") && element.dressUuid.match(urlParams.get("dressUuid")) && !urlFlag) {
