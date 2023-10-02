@@ -9,6 +9,13 @@ const spineMap = new Map();
 
 PIXI.settings.RENDER_OPTIONS.hello = false;
 
+const migrateMap = {
+    "sml_cloth0": "cb",
+    "sml_cloth1": "cb_costume",
+    "big_cloth0": "stand",
+    "big_cloth1": "stand_costume",
+}
+
 function dropHandler(event) {
     event.preventDefault();
     let pathJSON, pathAtlas, pathTexture;
@@ -201,13 +208,18 @@ function setupDressList(idolDressList) {
         let option = document.createElement("option");
         option.textContent = element.dressName;
         option.setAttribute("value", index);
-        option.setAttribute("dressUUID", element.dressUuid);
+        option.setAttribute("enzaId", element.enzaId);
         if (!element.exist) {
             option.setAttribute("disabled", true);
         }
         optGroup.appendChild(option);
 
-        if (urlParams.has("dressUuid") && element.dressUuid.match(urlParams.get("dressUuid")) && !urlFlag) {
+        if (!urlParams.has("enzaId") && index == 0) {
+            option.selected = true;
+        }
+
+        if (urlParams.has("enzaId") && element.enzaId.match(urlParams.get("enzaId")) && !urlFlag) {
+            option.selected = true;
             arrayOrder = index;
         }
     });
@@ -266,22 +278,25 @@ function setupTypeList(dressObj) {
         && !urlFlag) {
 
         const typeFromUri = urlParams.get("dressType");
-        if (typeFromUri == SML0) {
-            dressType = SML0;
-            sml0.selected = true;
+        switch (typeFromUri) {
+            case SML0:
+                dressType = SML0;
+                sml0.selected = true;
+                break;
+            case SML1:
+                dressType = SML1;
+                sml1.selected = true;
+                break;
+            case BIG0:
+                dressType = BIG0;
+                big0.selected = true;
+                break;
+            case BIG1:
+                dressType = BIG1;
+                big1.selected = true;
+                break;
         }
-        else if (typeFromUri == SML1) {
-            dressType = SML1;
-            sml1.selected = true;
-        }
-        else if (typeFromUri == BIG0) {
-            dressType = BIG0;
-            big0.selected = true;
-        }
-        else if (typeFromUri == BIG1) {
-            dressType = BIG1;
-            big1.selected = true;
-        }
+
         urlFlag = true;
     }
     else {
@@ -307,22 +322,22 @@ function setupTypeList(dressObj) {
         const dressList = document.getElementById("dressList");
         dressType = typeList.value;
 
-        testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("dressUUID"), dressType);
+        testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
     };
 
-    testAndLoadAnimation(dressObj.dressUuid, dressType);
+    testAndLoadAnimation(dressObj.enzaId, dressType);
 }
 
-function testAndLoadAnimation(uuid, type) {
-    if (!spineMap.has(`${uuid}/${type}`)) {
-        PIXI.Assets.load(`https://static.shinycolors.moe/spines/${uuid}/${type}/data.json`).then((resource) => {
+function testAndLoadAnimation(enzaId, type) {
+    if (!spineMap.has(`${enzaId}/${type}`)) {
+        PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then((resource) => {
             const waifu = resource.spineData;
-            spineMap.set(`${uuid}/${type}`, waifu);
+            spineMap.set(`${enzaId}/${type}`, waifu);
             setupAnimationList(waifu);
         });
     }
     else {
-        setupAnimationList(spineMap.get(`${uuid}/${type}`));
+        setupAnimationList(spineMap.get(`${enzaId}/${type}`));
     }
 }
 
@@ -468,8 +483,8 @@ function copyLinkToClipboard() {
     const idolId = document.getElementById("idolList").value;
     const dressList = document.getElementById("dressList");
     const dressType = document.getElementById("typeList").value;
-    const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
-    const link = `https://spine.shinycolors.moe/?idolId=${idolId}&dressUuid=${dressUuid.slice(0, 6)}&dressType=${dressType}`;
+    const enzaId = dressList.options[dressList.selectedIndex].getAttribute("enzaId");
+    const link = `https://spine.shinycolors.moe/?idolId=${idolId}&enzaId=${enzaId}&dressType=${dressType}`;
     navigator.clipboard.writeText(link);
 }
 
@@ -480,8 +495,8 @@ async function saveImage() {
     const anchor = document.createElement('a');
     const dressList = document.getElementById("dressList");
     const dressType = document.getElementById("typeList").value;
-    const dressUuid = dressList.options[dressList.selectedIndex].getAttribute("dressuuid");
-    anchor.download = `${dressUuid.slice(0, 6)}-${dressType}.png`;
+    const enzaId = dressList.options[dressList.selectedIndex].getAttribute("enzaId");
+    anchor.download = `${enzaId.slice(0, 6)}-${dressType}.png`;
     anchor.href = image.src;
     // Trigger a click event on the anchor element to initiate the download
     anchor.click();
