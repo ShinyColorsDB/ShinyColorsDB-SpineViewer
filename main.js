@@ -47,12 +47,21 @@ function dropHandler(event) {
     }
 
     if (pathAtlas && pathTexture && pathJSON) {
-        dropLoader
-            .add("dropJson", pathJSON)
-            .add("dropAtlas", pathAtlas)
-            .load(function (_, resources) {
-                renderByDrop(resources.dropAtlas.data, JSON.parse(resources.dropJson.data), pathTexture);
-            });
+        PIXI.Assets.add({
+            src: pathJSON,
+            alias: "dropJson",
+            format: 'json',
+            loadParser: 'loadJson'
+        });
+        PIXI.Assets.add({
+            src: pathAtlas,
+            alias: "dropAtlas",
+            format: 'text',
+            loadParser: 'loadTxt'
+        });
+        PIXI.Assets.load(["dropJson", "dropAtlas"]).then(() => {
+            renderByDrop(pathTexture);
+        });
     }
     else {
         alert("missing files!");
@@ -61,7 +70,20 @@ function dropHandler(event) {
 
 function dragOverHandler(event) {
     event.preventDefault();
-    dropLoader.reset();
+}
+
+async function renderByDrop(dataTexture) {
+    const rawJson = PIXI.Assets.get("dropJson");
+    const rawAtlas = PIXI.Assets.get("dropAtlas");
+    const rawTexture = await blobToBase64(dataTexture);
+    console.log(rawJson, rawAtlas, rawTexture);
+    const spineAtlas = new PIXI.spine.core.TextureAtlas(rawAtlas, (_, callback) => {
+        callback(PIXI.BaseTexture.from(rawTexture));
+    });
+    const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
+    const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
+    const spineData = spineJsonParser.readSkeletonData(rawJson);
+    setupAnimationList(spineData);
 }
 
 function toastInit() {
@@ -410,19 +432,6 @@ function animationOnChange(theInput, trackNo, currentSpine) {
     currentSpine.autoUpdate = true;
 }
 
-async function renderByDrop(dataAtlas, dataJson, dataTexture) {
-    const rawJson = dataJson;
-    const rawAtlas = dataAtlas;
-    const rawTexture = await blobToBase64(dataTexture);
-    const spineAtlas = new PIXI.spine.core.TextureAtlas(rawAtlas, (_, callback) => {
-        callback(PIXI.BaseTexture.from(rawTexture));
-    });
-    const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
-    const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
-    const spineData = spineJsonParser.readSkeletonData(rawJson);
-    setupAnimationList(spineData);
-}
-
 function blobToBase64(blob) {
     return new Promise((resolve, _) => {
         const reader = new FileReader();
@@ -496,7 +505,7 @@ async function saveImage() {
     const dressList = document.getElementById("dressList");
     const dressType = document.getElementById("typeList").value;
     const enzaId = dressList.options[dressList.selectedIndex].getAttribute("enzaId");
-    anchor.download = `${enzaId.slice(0, 6)}-${dressType}.png`;
+    anchor.download = `${enzaId}-${dressType}.png`;
     anchor.href = image.src;
     // Trigger a click event on the anchor element to initiate the download
     anchor.click();
