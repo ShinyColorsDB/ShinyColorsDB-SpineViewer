@@ -1,0 +1,93 @@
+[
+    {
+        "idolId": 0,
+        "dressName": "【緑の悪魔】七草はづき",
+        "dressUuid": "54e66235-8ce7-4416-b604-fe3c93904ca0",
+        "sml_Cloth0": 1,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 1,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff/data.json"
+    },
+    {
+        "idolId": 0,
+        "dressName": "【ボーカルマスタリー】七草はづき",
+        "dressUuid": "eb597ec2-5c50-4e08-afc7-31ead2354746",
+        "sml_Cloth0": 1,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 1,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff/vocal/data.json"
+    },
+    {
+        "idolId": 0,
+        "dressName": "【ダンスマスタリー】七草はづき",
+        "dressUuid": "d32ce5ad-25b0-40a8-8299-f585d58e1113",
+        "sml_Cloth0": 1,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 1,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff/dance/data.json"
+    },
+    {
+        "idolId": 0,
+        "dressName": "【ビジュアルマスタリー】七草はづき",
+        "dressUuid": "fbbbecbe-0139-4159-bcd5-c3dd739ccc80",
+        "sml_Cloth0": 1,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 1,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff/visual/data.json"
+    },
+    {
+        "idolId": 0,
+        "dressName": "【クリスマスの七草】七草はづき",
+        "dressUuid": "98bb1930-e4ac-4392-b66a-7a93085ce727",
+        "sml_Cloth0": 1,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 1,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff/christmas/data.json"
+    },
+    {
+        "idolId": 0,
+        "dressName": "【夏の七草】七草はづき",
+        "dressUuid": "cd417043-e37b-4993-92e4-7082b8c2782b",
+        "sml_Cloth0": 0,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 1,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff_swimsuit/data.json"
+    },
+    {
+        "idolId": 0,
+        "dressName": "【巫女の七草】七草はづき",
+        "dressUuid": "6d1be70c-c861-4259-b8f9-a8380ba000d2",
+        "sml_Cloth0": 1,
+        "sml_Cloth1": 0,
+        "big_Cloth0": 0,
+        "big_Cloth1": 0,
+        "dressType": "Special",
+        "enzaId": "0",
+        "exist": 1,
+        "path": "staff/miko/data.json"
+    }
+]

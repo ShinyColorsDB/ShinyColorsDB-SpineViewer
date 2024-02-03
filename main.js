@@ -200,10 +200,18 @@ function setupPreset(presetList) {
 
 function testAndLoadDress(idolId, idolName) {
     if (!idolMap.has(idolName)) {
-        fetch(`https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).then(async (response) => {
-            idolMap.set(idolName, await response.json());
-            setupDressList(idolMap.get(idolName));
-        });
+        if (idolId == 0) {
+            fetch(`https://cf-static.shinycolors.moe/others/hazuki.json`).then(async (response) => {
+                idolMap.set(idolName, await response.json());
+                setupDressList(idolMap.get(idolName));
+            });
+        }
+        else {
+            fetch(`https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).then(async (response) => {
+                idolMap.set(idolName, await response.json());
+                setupDressList(idolMap.get(idolName));
+            });
+        }
     }
     else {
         setupDressList(idolMap.get(idolName));
@@ -231,6 +239,9 @@ function setupDressList(idolDressList) {
         option.textContent = element.dressName;
         option.setAttribute("value", index);
         option.setAttribute("enzaId", element.enzaId);
+        if (element.idolId == 0) {
+            option.setAttribute("path", element.path);
+        }
         if (!element.exist) {
             option.setAttribute("disabled", true);
         }
@@ -344,19 +355,39 @@ function setupTypeList(dressObj) {
         const dressList = document.getElementById("dressList");
         dressType = typeList.value;
 
-        testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
+        if (dressObj.idolId == 0) {
+            testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("path"), dressType, true);
+        }
+        else {
+            testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
+        }
     };
 
-    testAndLoadAnimation(dressObj.enzaId, dressType);
+    if (dressObj.idolId == 0) {
+        testAndLoadAnimation(dressObj.path, dressType, true);
+    }
+    else {
+        testAndLoadAnimation(dressObj.enzaId, dressType);
+    }
+
 }
 
-function testAndLoadAnimation(enzaId, type) {
+function testAndLoadAnimation(enzaId, type, flag = false) {
     if (!spineMap.has(`${enzaId}/${type}`)) {
-        PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then((resource) => {
-            const waifu = resource.spineData;
-            spineMap.set(`${enzaId}/${type}`, waifu);
-            setupAnimationList(waifu);
-        });
+        if (flag) {
+            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then((resource) => {
+                const waifu = resource.spineData;
+                spineMap.set(`${enzaId}/${type}`, waifu);
+                setupAnimationList(waifu);
+            });
+        }
+        else {
+            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then((resource) => {
+                const waifu = resource.spineData;
+                spineMap.set(`${enzaId}/${type}`, waifu);
+                setupAnimationList(waifu);
+            });
+        }
     }
     else {
         setupAnimationList(spineMap.get(`${enzaId}/${type}`));
