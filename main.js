@@ -529,15 +529,19 @@ function copyLinkToClipboard() {
 }
 
 async function saveImage() {
-    const renderer = app.renderer;
-    const image = await renderer.extract.image(cont);
+  const renderer = app.renderer;
+  const image = await renderer.extract.image(cont);
 
-    const anchor = document.createElement('a');
-    const dressList = document.getElementById("dressList");
-    const dressType = document.getElementById("typeList").value;
-    const enzaId = dressList.options[dressList.selectedIndex].getAttribute("enzaId");
-    anchor.download = `${enzaId}-${dressType}.png`;
-    anchor.href = image.src;
-    // Trigger a click event on the anchor element to initiate the download
-    anchor.click();
+  const anchor = document.createElement('a');
+
+  const idolName = document.getElementById("idolList").selectedOptions[0].text;
+  const optionElement = document.getElementById("dressList").selectedOptions[0];
+  const dressCategory = optionElement.parentNode.label;
+  const dressName = optionElement.text;
+  const dressType = document.getElementById("typeList").selectedOptions[0].text;
+  const fileName = `${idolName}-${dressCategory}-${dressName}-${dressType}.png`;
+  anchor.download = fileName;
+  anchor.href = image.src;
+  // Trigger a click event on the anchor element to initiate the download
+  anchor.click();
 }
