@@ -531,16 +531,19 @@ function copyLinkToClipboard() {
 async function saveImage() {
     const renderer = app.renderer;
     const image = await renderer.extract.image(cont);
-
     const anchor = document.createElement('a');
-
     const idolName = document.getElementById("idolList").selectedOptions[0].text;
     const optionElement = document.getElementById("dressList").selectedOptions[0];
     const dressCategory = optionElement.parentNode.label;
     const dressName = optionElement.text;
     const dressType = document.getElementById("typeList").selectedOptions[0].text;
     const fileName = `${idolName}-${dressCategory}-${dressName}-${dressType}.png`;
-    anchor.download = fileName;
+    // Windows: <>:"/\|?*
+    // macOS/Linux : /
+    const invalidRagex = /[<>:"\/\\|?*\x00-\x1F]/g; 
+    const validFileName = fileName.replace(invalidRagex, '_');
+
+    anchor.download = validFileName;
     anchor.href = image.src;
     // Trigger a click event on the anchor element to initiate the download
     anchor.click();
