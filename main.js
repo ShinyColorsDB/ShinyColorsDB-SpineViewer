@@ -470,8 +470,13 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
-
+const clearState = (spine) => {
+    spine.state.clearTracks();
+    spine.skeleton.setToSetupPose();
+    spine.lastTime = null;
+};
 async function renderToStage(currentSpine) {
+    clearState(currentSpine)
     cont.removeChild(cont.children[0]);
     cont.addChild(currentSpine);
 
