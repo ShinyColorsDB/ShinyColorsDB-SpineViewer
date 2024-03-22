@@ -4,6 +4,9 @@ const dropLoader = PIXI.Assets, cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 const urlParams = new URLSearchParams(window.location.search);
 
+// State
+let isContinuousShootingEnabled = false
+
 const idolMap = new Map();
 const spineMap = new Map();
 
@@ -139,6 +142,12 @@ async function init() {
     resetBtn.onclick = () => {
         resetAllAnimation();
     }
+
+    const continuousShootingModeSwitch = document.getElementById("continuousShootingModeSwitch")
+    continuousShootingModeSwitch.addEventListener("change", (event) => {
+        isContinuousShootingEnabled = event.target.checked
+        // console.info(`enableContinuousShooting:${isContinuousShootingEnabled}`) 
+    })
 
     fetch("https://api.shinycolors.moe/spine/idollist").then(async (response) => {
         const idolInfo = await response.json();
@@ -482,7 +491,7 @@ const clearState = (spine) => {
     spine.lastTime = null;
 };
 async function renderToStage(currentSpine) {
-    clearState(currentSpine)
+    if (isContinuousShootingEnabled) { clearState(currentSpine) }
     cont.removeChild(cont.children[0]);
     cont.addChild(currentSpine);
 
@@ -509,7 +518,7 @@ async function renderToStage(currentSpine) {
     cont.pivot.set(contLocalBound.width / 2, contLocalBound.height / 2);
     cont.position.set(app.view.width / 2, app.view.height / 2);
 
-    await saveImage();
+    if (isContinuousShootingEnabled) { await saveImage(); }
 }
 
 function resetAllAnimation() {
