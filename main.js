@@ -98,6 +98,11 @@ function toastInit() {
     }
 }
 
+function tooltipInit() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+}
+
 function toMobileUI() {
     window.location.href = "https://mspine.shinycolors.moe";
 }
@@ -115,6 +120,7 @@ async function init() {
     }
 
     toastInit();
+    tooltipInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
