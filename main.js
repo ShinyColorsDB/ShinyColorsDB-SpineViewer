@@ -4,6 +4,9 @@ const dropLoader = PIXI.Assets, cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 const urlParams = new URLSearchParams(window.location.search);
 
+// State
+let isContinuousShootingEnabled = false
+
 const idolMap = new Map();
 const spineMap = new Map();
 
@@ -83,7 +86,7 @@ async function renderByDrop(dataTexture) {
     const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
     const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
     const spineData = spineJsonParser.readSkeletonData(rawJson);
-    setupAnimationList(spineData);
+    await setupAnimationList(spineData);
 }
 
 function toastInit() {
@@ -96,6 +99,11 @@ function toastInit() {
             toast.show();
         });
     }
+}
+
+function tooltipInit() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 }
 
 function toMobileUI() {
@@ -115,6 +123,7 @@ async function init() {
     }
 
     toastInit();
+    tooltipInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
@@ -134,13 +143,19 @@ async function init() {
         resetAllAnimation();
     }
 
+    const continuousShootingModeSwitch = document.getElementById("continuousShootingModeSwitch")
+    continuousShootingModeSwitch.addEventListener("change", (event) => {
+        isContinuousShootingEnabled = event.target.checked
+        // console.info(`enableContinuousShooting:${isContinuousShootingEnabled}`) 
+    })
+
     fetch("https://api.shinycolors.moe/spine/idollist").then(async (response) => {
         const idolInfo = await response.json();
         const idolInfoMap = new Map();
         idolInfo.forEach((element) => {
             idolInfoMap.set(element.idolId, element);
         });
-        setupIdolList(idolInfoMap);
+        await setupIdolList(idolInfoMap);
     });
 
     _hello();
@@ -158,7 +173,7 @@ function _hello() {
     console.log(...log);
 }
 
-function setupIdolList(idolInfo) {
+async function setupIdolList(idolInfo) {
     const idolList = document.getElementById("idolList");
     let idolId = urlParams.has("idolId") ? Number(urlParams.get("idolId")) : 1,
         idolName = idolInfo.get(idolId).idolName;
@@ -174,13 +189,13 @@ function setupIdolList(idolInfo) {
         idolList.appendChild(option);
     });
 
-    idolList.onchange = () => {
+    idolList.onchange = async () => {
         idolId = idolList.value;
         idolName = idolInfo.get(Number(idolId)).idolName;
-        testAndLoadDress(idolId, idolName);
+        await testAndLoadDress(idolId, idolName);
     };
 
-    testAndLoadDress(idolId, idolName);
+    await testAndLoadDress(idolId, idolName);
 }
 /*
 function testAndLoadPreset(idolId) {
@@ -198,27 +213,27 @@ function setupPreset(presetList) {
 
 }
 
-function testAndLoadDress(idolId, idolName) {
+async function testAndLoadDress(idolId, idolName) {
     if (!idolMap.has(idolName)) {
         if (idolId == 0) {
             fetch(`https://cf-static.shinycolors.moe/others/hazuki.json`).then(async (response) => {
                 idolMap.set(idolName, await response.json());
-                setupDressList(idolMap.get(idolName));
+                await setupDressList(idolMap.get(idolName));
             });
         }
         else {
             fetch(`https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).then(async (response) => {
                 idolMap.set(idolName, await response.json());
-                setupDressList(idolMap.get(idolName));
+                await setupDressList(idolMap.get(idolName));
             });
         }
     }
     else {
-        setupDressList(idolMap.get(idolName));
+        await setupDressList(idolMap.get(idolName));
     }
 }
 
-function setupDressList(idolDressList) {
+async function setupDressList(idolDressList) {
     const dressList = document.getElementById("dressList");
     dressList.innerHTML = "";
 
@@ -258,15 +273,15 @@ function setupDressList(idolDressList) {
     });
     dressList.appendChild(optGroup);
 
-    dressList.onchange = () => {
+    dressList.onchange = async () => {
         arrayOrder = dressList.value;
-        setupTypeList(idolDressList[arrayOrder]);
+        await setupTypeList(idolDressList[arrayOrder]);
     };
 
-    setupTypeList(idolDressList[arrayOrder]);
+    await setupTypeList(idolDressList[arrayOrder]);
 }
 
-function setupTypeList(dressObj) {
+async function setupTypeList(dressObj) {
     const typeList = document.getElementById("typeList");
     let dressType;
     typeList.innerHTML = "";
@@ -351,50 +366,50 @@ function setupTypeList(dressObj) {
         }
     }
 
-    typeList.onchange = () => {
+    typeList.onchange = async () => {
         const dressList = document.getElementById("dressList");
         dressType = typeList.value;
 
         if (dressObj.idolId == 0) {
-            testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("path"), dressType, true);
+            await testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("path"), dressType, true);
         }
         else {
-            testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
+            await testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
         }
     };
 
     if (dressObj.idolId == 0) {
-        testAndLoadAnimation(dressObj.path, dressType, true);
+        await testAndLoadAnimation(dressObj.path, dressType, true);
     }
     else {
-        testAndLoadAnimation(dressObj.enzaId, dressType);
+        await testAndLoadAnimation(dressObj.enzaId, dressType);
     }
 
 }
 
-function testAndLoadAnimation(enzaId, type, flag = false) {
+async function testAndLoadAnimation(enzaId, type, flag = false) {
     if (!spineMap.has(`${enzaId}/${type}`)) {
         if (flag) {
-            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then((resource) => {
+            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then(async (resource) => {
                 const waifu = resource.spineData;
                 spineMap.set(`${enzaId}/${type}`, waifu);
-                setupAnimationList(waifu);
+                await setupAnimationList(waifu);
             });
         }
         else {
-            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then((resource) => {
+            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then(async (resource) => {
                 const waifu = resource.spineData;
                 spineMap.set(`${enzaId}/${type}`, waifu);
-                setupAnimationList(waifu);
+                await setupAnimationList(waifu);
             });
         }
     }
     else {
-        setupAnimationList(spineMap.get(`${enzaId}/${type}`));
+        await setupAnimationList(spineMap.get(`${enzaId}/${type}`));
     }
 }
 
-function setupAnimationList(spineData) {
+async function setupAnimationList(spineData) {
     const animationList = document.getElementById("divAnimationBody");
     animationList.innerHTML = "";
 
@@ -447,7 +462,7 @@ function setupAnimationList(spineData) {
         currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
     }
 
-    renderToStage(currentSpine);
+    await renderToStage(currentSpine);
 }
 
 function animationOnChange(theInput, trackNo, currentSpine) {
@@ -470,8 +485,13 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
-
-function renderToStage(currentSpine) {
+const clearState = (spine) => {
+    spine.state.clearTracks();
+    spine.skeleton.setToSetupPose();
+    spine.lastTime = null;
+};
+async function renderToStage(currentSpine) {
+    if (isContinuousShootingEnabled) { clearState(currentSpine) }
     cont.removeChild(cont.children[0]);
     cont.addChild(currentSpine);
 
@@ -497,6 +517,8 @@ function renderToStage(currentSpine) {
     cont.scale.set(scale);
     cont.pivot.set(contLocalBound.width / 2, contLocalBound.height / 2);
     cont.position.set(app.view.width / 2, app.view.height / 2);
+
+    if (isContinuousShootingEnabled) { await saveImage(); }
 }
 
 function resetAllAnimation() {
