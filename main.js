@@ -4,9 +4,6 @@ const dropLoader = PIXI.Assets, cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 const urlParams = new URLSearchParams(window.location.search);
 
-// State
-let isContinuousShootingEnabled = false
-
 const idolMap = new Map();
 const spineMap = new Map();
 
@@ -17,7 +14,7 @@ const migrateMap = {
     "sml_cloth1": "cb_costume",
     "big_cloth0": "stand",
     "big_cloth1": "stand_costume",
-}
+};
 
 function dropHandler(event) {
     event.preventDefault();
@@ -51,8 +48,8 @@ function dropHandler(event) {
 
     if (pathAtlas && pathTexture && pathJSON) {
         PIXI.Assets.add({
-            src: pathJSON,
             alias: "dropJson",
+            src: pathJSON,
             format: 'json',
             loadParser: 'loadJson'
         });
@@ -62,6 +59,7 @@ function dropHandler(event) {
             format: 'txt',
             loadParser: 'loadTxt'
         });
+
         PIXI.Assets.load(["dropJson", "dropAtlas"]).then(() => {
             renderByDrop(pathTexture);
         });
@@ -103,11 +101,6 @@ function toastInit() {
     }
 }
 
-function tooltipInit() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-}
-
 function toMobileUI() {
     window.location.href = "https://mspine.shinycolors.moe";
 }
@@ -125,7 +118,6 @@ async function init() {
     }
 
     toastInit();
-    tooltipInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
     app = new PIXI.Application({
@@ -149,7 +141,8 @@ async function init() {
     continuousShootingModeSwitch.addEventListener("change", (event) => {
         isContinuousShootingEnabled = event.target.checked
         // console.info(`enableContinuousShooting:${isContinuousShootingEnabled}`)
-    })
+    });
+
 
     fetch("https://api.shinycolors.moe/spine/idollist").then(async (response) => {
         const idolInfo = await response.json();
@@ -157,7 +150,7 @@ async function init() {
         idolInfo.forEach((element) => {
             idolInfoMap.set(element.idolId, element);
         });
-        await setupIdolList(idolInfoMap);
+        setupIdolList(idolInfoMap);
     });
 
     _hello();
@@ -175,7 +168,7 @@ function _hello() {
     console.log(...log);
 }
 
-async function setupIdolList(idolInfo) {
+function setupIdolList(idolInfo) {
     const idolList = document.getElementById("idolList");
     let idolId = urlParams.has("idolId") ? Number(urlParams.get("idolId")) : 1,
         idolName = idolInfo.get(idolId).idolName;
@@ -191,13 +184,13 @@ async function setupIdolList(idolInfo) {
         idolList.appendChild(option);
     });
 
-    idolList.onchange = async () => {
+    idolList.onchange = () => {
         idolId = idolList.value;
         idolName = idolInfo.get(Number(idolId)).idolName;
-        await testAndLoadDress(idolId, idolName);
+        testAndLoadDress(idolId, idolName);
     };
 
-    await testAndLoadDress(idolId, idolName);
+    testAndLoadDress(idolId, idolName);
 }
 /*
 function testAndLoadPreset(idolId) {
@@ -215,32 +208,32 @@ function setupPreset(presetList) {
 
 }
 
-async function testAndLoadDress(idolId, idolName) {
+function testAndLoadDress(idolId, idolName) {
     if (!idolMap.has(idolName)) {
         if (idolId == 0) {
             fetch(`https://cf-static.shinycolors.moe/others/hazuki.json`).then(async (response) => {
                 idolMap.set(idolName, await response.json());
-                await setupDressList(idolMap.get(idolName));
+                setupDressList(idolMap.get(idolName));
             });
         }
         else {
             fetch(`https://api.shinycolors.moe/spine/dressList?idolId=${idolId}`).then(async (response) => {
                 idolMap.set(idolName, await response.json());
-                await setupDressList(idolMap.get(idolName));
+                setupDressList(idolMap.get(idolName));
             });
         }
     }
     else {
-        await setupDressList(idolMap.get(idolName));
+        setupDressList(idolMap.get(idolName));
     }
 }
 
-async function setupDressList(idolDressList) {
+function setupDressList(idolDressList) {
     const dressList = document.getElementById("dressList");
     dressList.innerHTML = "";
 
     let lastType = "P_SSR", optGroup = document.createElement("optgroup");
-        optGroup.label = "P_SSR";
+    optGroup.label = "P_SSR";
     let arrayOrder = 0;
 
     idolDressList.forEach((element, index) => {
@@ -275,15 +268,15 @@ async function setupDressList(idolDressList) {
     });
     dressList.appendChild(optGroup);
 
-    dressList.onchange = async () => {
+    dressList.onchange = () => {
         arrayOrder = dressList.value;
-        await setupTypeList(idolDressList[arrayOrder]);
+        setupTypeList(idolDressList[arrayOrder]);
     };
 
-    await setupTypeList(idolDressList[arrayOrder]);
+    setupTypeList(idolDressList[arrayOrder]);
 }
 
-async function setupTypeList(dressObj) {
+function setupTypeList(dressObj) {
     const typeList = document.getElementById("typeList");
     let dressType;
     typeList.innerHTML = "";
@@ -368,50 +361,50 @@ async function setupTypeList(dressObj) {
         }
     }
 
-    typeList.onchange = async () => {
+    typeList.onchange = () => {
         const dressList = document.getElementById("dressList");
         dressType = typeList.value;
 
         if (dressObj.idolId == 0) {
-            await testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("path"), dressType, true);
+            testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("path"), dressType, true);
         }
         else {
-            await testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
+            testAndLoadAnimation(dressList.options[dressList.selectedIndex].getAttribute("enzaId"), dressType);
         }
     };
 
     if (dressObj.idolId == 0) {
-        await testAndLoadAnimation(dressObj.path, dressType, true);
+        testAndLoadAnimation(dressObj.path, dressType, true);
     }
     else {
-        await testAndLoadAnimation(dressObj.enzaId, dressType);
+        testAndLoadAnimation(dressObj.enzaId, dressType);
     }
 
 }
 
-async function testAndLoadAnimation(enzaId, type, flag = false) {
+function testAndLoadAnimation(enzaId, type, flag = false) {
     if (!spineMap.has(`${enzaId}/${type}`)) {
         if (flag) {
-            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then(async (resource) => {
+            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then((resource) => {
                 const waifu = resource.spineData;
                 spineMap.set(`${enzaId}/${type}`, waifu);
-                await setupAnimationList(waifu);
+                setupAnimationList(waifu);
             });
         }
         else {
-            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then(async (resource) => {
+            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then((resource) => {
                 const waifu = resource.spineData;
                 spineMap.set(`${enzaId}/${type}`, waifu);
-                await setupAnimationList(waifu);
+                setupAnimationList(waifu);
             });
         }
     }
     else {
-        await setupAnimationList(spineMap.get(`${enzaId}/${type}`));
+        setupAnimationList(spineMap.get(`${enzaId}/${type}`));
     }
 }
 
-async function setupAnimationList(spineData) {
+function setupAnimationList(spineData) {
     const animationList = document.getElementById("divAnimationBody");
     animationList.innerHTML = "";
 
@@ -464,7 +457,7 @@ async function setupAnimationList(spineData) {
         currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
     }
 
-    await renderToStage(currentSpine);
+    renderToStage(currentSpine);
 }
 
 function animationOnChange(theInput, trackNo, currentSpine) {
@@ -487,13 +480,8 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
-const clearState = (spine) => {
-    spine.state.clearTracks();
-    spine.skeleton.setToSetupPose();
-    spine.lastTime = null;
-};
-async function renderToStage(currentSpine) {
-    if (isContinuousShootingEnabled) { clearState(currentSpine) }
+
+function renderToStage(currentSpine) {
     cont.removeChild(cont.children[0]);
     cont.addChild(currentSpine);
 
@@ -519,8 +507,6 @@ async function renderToStage(currentSpine) {
     cont.scale.set(scale);
     cont.pivot.set(contLocalBound.width / 2, contLocalBound.height / 2);
     cont.position.set(app.view.width / 2, app.view.height / 2);
-
-    if (isContinuousShootingEnabled) { await saveImage(); }
 }
 
 function resetAllAnimation() {
