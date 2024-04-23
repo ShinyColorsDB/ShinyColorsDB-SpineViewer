@@ -22,8 +22,8 @@
         <link rel="shortcut icon" href="./assets/favicon.ico" />
         <link rel="bookmark" href="./assets/favicon.ico" />
 
-        <script src="https://pixijs.download/v7.2.4/pixi.min.js"></script>
-        <script src="https://pixijs.download/v7.2.4/pixi-legacy.min.js"></script>
+        <script src="https://pixijs.download/v7.4.2/pixi.min.js"></script>
+        <script src="https://pixijs.download/v7.4.2/pixi-legacy.min.js"></script>
         <script src="./pixi-spine.js"></script>
 
         <!-- Primary Meta Tags -->
@@ -227,6 +227,20 @@
 
             <input type="button" class="btn btn-secondary bottom-0" data-bs-toggle="offcanvas"
                 data-bs-target="#menuOffCanvas" value="back">
+                <div class="form-check form-switch">
+                <input id="continuousShootingModeSwitch" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                <label class="form-check-label" for="flexSwitchCheckDefault"><span>Enable continuous shooting</span>
+                    <span type="button" class="badge rounded-pill bg-info" data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-title="Animation does not start when changing idol, costume, or type. The image will be downloaded automatically. Check the animation list’s checkboxes to animate.">
+                        <!-- "Info lg" icon from Bootstrap Icons -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-lg"
+                            viewBox="0 0 16 16">
+                            <path
+                                d="m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z" />
+                        </svg>
+                    </span>
+                </label>
+            </div>
         </div>
 
         <footer class="footer mt-auto py-3 bg-dark w-100 position-absolute bottom-0 start-50 translate-middle-x">
