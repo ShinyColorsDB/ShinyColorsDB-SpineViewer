@@ -79,13 +79,14 @@ async function renderByDrop(dataTexture) {
     const rawJson = PIXI.Assets.get("dropJson");
     const rawAtlas = PIXI.Assets.get("dropAtlas");
     const rawTexture = await blobToBase64(dataTexture);
-    console.log(rawJson, rawAtlas, rawTexture);
-    const spineAtlas = new PIXI.spine.core.TextureAtlas(rawAtlas, (_, callback) => {
+    //console.log(rawJson, rawAtlas, rawTexture);
+    const spineAtlas = new PIXI.spine.TextureAtlas(rawAtlas, (_, callback) => {
         callback(PIXI.BaseTexture.from(rawTexture));
     });
-    const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
-    const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
-    const spineData = spineJsonParser.readSkeletonData(rawJson);
+    //const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
+    //const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
+    const spineJsonParser = new PIXI.spine.SkeletonJson();
+    const spineData = spineJsonParser.readSkeletonData(spineAtlas, rawJson);
     await setupAnimationList(spineData);
 }
 
@@ -146,7 +147,7 @@ async function init() {
     const continuousShootingModeSwitch = document.getElementById("continuousShootingModeSwitch")
     continuousShootingModeSwitch.addEventListener("change", (event) => {
         isContinuousShootingEnabled = event.target.checked
-        // console.info(`enableContinuousShooting:${isContinuousShootingEnabled}`) 
+        // console.info(`enableContinuousShooting:${isContinuousShootingEnabled}`)
     })
 
     fetch("https://api.shinycolors.moe/spine/idollist").then(async (response) => {
@@ -562,7 +563,7 @@ async function saveImage() {
     const fileName = `${idolName}-${dressCategory}-${dressName}-${dressType}.png`;
     // Windows: <>:"/\|?*
     // macOS/Linux : /
-    const invalidRagex = /[<>:"\/\\|?*\x00-\x1F]/g; 
+    const invalidRagex = /[<>:"\/\\|?*\x00-\x1F]/g;
     const validFileName = fileName.replace(invalidRagex, '_');
 
     anchor.download = validFileName;
