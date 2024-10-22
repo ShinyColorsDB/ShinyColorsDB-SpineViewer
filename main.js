@@ -50,6 +50,9 @@ function dropHandler(event) {
     }
 
     if (pathAtlas && pathTexture && pathJSON) {
+        // PIXI.Assets.unload(['dropJson', 'dropAtlas']).then(() => {
+
+        // });
         PIXI.Assets.add({
             src: pathJSON,
             alias: "dropJson",
@@ -216,7 +219,7 @@ function setupPreset(presetList) {
 
 async function testAndLoadDress(idolId, idolName) {
     if (!idolMap.has(idolName)) {
-        if (idolId == 0) {
+        if (idolId == 91) {
             fetch(`https://cf-static.shinycolors.moe/others/hazuki.json`).then(async (response) => {
                 idolMap.set(idolName, await response.json());
                 await setupDressList(idolMap.get(idolName));
