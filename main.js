@@ -66,7 +66,6 @@ async function createDropSpine(atlas, json, texture) {
     //skel
     const rawJSON = await PIXI.DOMAdapter.get().fetch(json).then((response)=>response.json());
     PIXI.Assets.cache.set("skel_drop", rawJSON);
-    console.log(rawJSON)
     //atlas
     const rawAtlas = await PIXI.DOMAdapter.get().fetch(atlas).then((response)=>response.text());
     const textureAtlas = new PIXI.Spine37.TextureAtlas(rawAtlas);
@@ -412,13 +411,13 @@ async function testAndLoadAnimation(enzaId, type, flag = false) {
                 {alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`},
                 {alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.atlas`}
             ]).then(async ()=>{
-                // console.log(resource)
+                spineMap.set(`${enzaId}/${type}`, label);
                 await setupAnimationList(label)
             })
         }
     }
     else {
-        // await setupAnimationList(spineMap.get(`${enzaId}/${type}`));
+        await setupAnimationList(spineMap.get(`${enzaId}/${type}`));
     }
 }
 
