@@ -3,7 +3,7 @@ let app, urlFlag = false;
 const dropLoader = PIXI.Assets, cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 const urlParams = new URLSearchParams(window.location.search);
-let PIXIrenderer = 'webgpu';
+let PIXIrenderer = 'webgpu'; //預設使用webgpu
 
 // State
 let isContinuousShootingEnabled = false
@@ -126,11 +126,16 @@ async function init() {
         mobileWarning.toggle();
     }
 
+    //檢查是否是手機裝置
+    if (/(Android|iPhone|iPad)/i.test(navigator.userAgent) && window.location.href.match(/mspine/)) {
+        PIXIrenderer = 'webgl'; // 變成預設使用webgl
+    }
+
     toastInit();
     tooltipInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
-    PIXIrenderer = urlParams.has('renderer') ? urlParams.get('renderer') : 'webgpu'; // 'webgl', 'webgpu'
+    PIXIrenderer = urlParams.has('renderer') ? urlParams.get('renderer') : PIXIrenderer; // 'webgl', 'webgpu'
     app = new PIXI.Application();
     await app.init({
         preference : PIXIrenderer,
