@@ -3,14 +3,13 @@ let app, urlFlag = false;
 const dropLoader = PIXI.Assets, cont = new PIXI.Container();
 const SML0 = "sml_cloth0", SML1 = "sml_cloth1", BIG0 = "big_cloth0", BIG1 = "big_cloth1";
 const urlParams = new URLSearchParams(window.location.search);
+let PIXIrenderer = 'webgpu';
 
 // State
 let isContinuousShootingEnabled = false
 
 const idolMap = new Map();
 const spineMap = new Map();
-
-PIXI.settings.RENDER_OPTIONS.hello = false;
 
 const migrateMap = {
     "sml_cloth0": "cb",
@@ -21,7 +20,8 @@ const migrateMap = {
 
 function dropHandler(event) {
     event.preventDefault();
-    let pathJSON, pathAtlas, pathTexture;
+    let pathJSON, pathAtlas;
+    const pathTexture = new Map(); //有可能不止一張圖片
     if (event.dataTransfer.items) {
         for (let item of event.dataTransfer.items) {
             if (item.kind === "file") {
@@ -30,46 +30,30 @@ function dropHandler(event) {
                 if (file.name.endsWith(".atlas")) {
                     pathAtlas = blobURL;
                 } else if (file.name.endsWith(".png") || file.name.endsWith(".webp")) {
-                    pathTexture = file;
+                    pathTexture.set(file.name, file); //有可能不止一張圖片
                 } else if (file.name.endsWith(".json")) {
                     pathJSON = blobURL;
                 }
             }
         }
-    } else {
+    }
+    else {
         for (let file of event.dataTransfer.files) {
             const blobURL = window.URL.createObjectURL(file);
             if (file.name.endsWith(".atlas")) {
                 pathAtlas = blobURL;
             } else if (file.name.endsWith(".png") || file.name.endsWith(".webp")) {
-                pathTexture = file;
+                pathTexture.set(file.name, file); //有可能不止一張圖片
             } else if (file.name.endsWith(".json")) {
                 pathJSON = blobURL;
             }
         }
     }
 
-    if (pathAtlas && pathTexture && pathJSON) {
-        // PIXI.Assets.unload(['dropJson', 'dropAtlas']).then(() => {
-
-        // });
-        PIXI.Assets.add({
-            src: pathJSON,
-            alias: "dropJson",
-            format: 'json',
-            loadParser: 'loadJson'
-        });
-        PIXI.Assets.add({
-            src: pathAtlas,
-            alias: "dropAtlas",
-            format: 'text',
-            loadParser: 'loadTxt'
-        });
-        PIXI.Assets.load(["dropJson", "dropAtlas"]).then(() => {
-            renderByDrop(pathTexture);
-        });
+    if (pathAtlas && pathJSON && pathTexture.size > 0) {
+        createDropSpine(pathAtlas, pathJSON, pathTexture);
     }
-    else {
+    else{
         alert("missing files!");
     }
 }
@@ -78,19 +62,35 @@ function dragOverHandler(event) {
     event.preventDefault();
 }
 
-async function renderByDrop(dataTexture) {
-    const rawJson = PIXI.Assets.get("dropJson");
-    const rawAtlas = PIXI.Assets.get("dropAtlas");
-    const rawTexture = await blobToBase64(dataTexture);
-    //console.log(rawJson, rawAtlas, rawTexture);
-    const spineAtlas = new PIXI.spine.TextureAtlas(rawAtlas, (_, callback) => {
-        callback(PIXI.BaseTexture.from(rawTexture));
-    });
-    //const spineAtlasLoader = new PIXI.spine.core.AtlasAttachmentLoader(spineAtlas);
-    //const spineJsonParser = new PIXI.spine.core.SkeletonJson(spineAtlasLoader);
-    const spineJsonParser = new PIXI.spine.SkeletonJson();
-    const spineData = spineJsonParser.readSkeletonData(spineAtlas, rawJson);
-    await setupAnimationList(spineData);
+async function createDropSpine(atlas, json, texture) {
+    //skel
+    const rawJSON = await PIXI.DOMAdapter.get().fetch(json).then((response)=>response.json());
+    PIXI.Assets.cache.set("skel_drop", rawJSON);
+    //atlas
+    const rawAtlas = await PIXI.DOMAdapter.get().fetch(atlas).then((response)=>response.text());
+    const textureAtlas = new PIXI.Spine37.TextureAtlas(rawAtlas);
+    PIXI.Assets.cache.set("atlas_drop", textureAtlas);
+    //textures
+    const textureLoadingPromises = [];
+    for (const page of textureAtlas.pages) {
+        
+        const base64Texture = await blobToBase64(texture.get(page.name));
+        
+        const pixiPromise = PIXI.Assets.load({
+            alias: page.name,
+            src: base64Texture,
+            data : {
+                alphaMode: page.pma ? 'premultiplied-alpha' : 'premultiply-alpha-on-upload'
+            }
+        }).then((rawtexture)=>{
+            page.setTexture(PIXI.Spine37.SpineTexture.from(rawtexture.source));
+        })
+
+        textureLoadingPromises.push(pixiPromise);
+    }
+    await Promise.all(textureLoadingPromises);
+
+    await setupAnimationList('drop');
 }
 
 function toastInit() {
@@ -115,10 +115,10 @@ function toMobileUI() {
 }
 
 async function init() {
-    if (!PIXI.utils.isWebGLSupported()) {
+    if (!PIXI.isWebGLSupported() && !PIXI.isWebGPUSupported()) {
         const hardwareAccel = new bootstrap.Modal(document.getElementById("divWebGL"));
         hardwareAccel.toggle();
-        console.log('WebGL is not supported in this browser.');
+        console.log('WebGL/WebGPU is not supported in this browser.');
     }
 
     if (/(Android|iPhone|iPad)/i.test(navigator.userAgent) && !window.location.href.match(/mspine/)) {
@@ -130,17 +130,21 @@ async function init() {
     tooltipInit();
     const canvas = document.getElementById("canvas"), resetBtn = document.getElementById("resetAnimation");
 
-    app = new PIXI.Application({
+    PIXIrenderer = urlParams.has('renderer') ? urlParams.get('renderer') : 'webgpu'; // 'webgl', 'webgpu'
+    app = new PIXI.Application();
+    await app.init({
+        preference : PIXIrenderer,
         view: canvas,
         width: canvas.clientWidth - 1,
         height: canvas.clientHeight - 1,
-    });
+    })
+    PIXIrenderer = app.renderer.name;
 
     app.stage.addChild(cont);
 
     const colorPicker = document.getElementById("colorPicker");
     colorPicker.onchange = (event) => {
-        app.renderer.backgroundColor = String(event.target.value).replace(/#/, "0X");
+        app.renderer.background.color = String(event.target.value).replace(/#/, "0X");
     };
 
     resetBtn.onclick = () => {
@@ -167,7 +171,7 @@ async function init() {
 
 function _hello() {
     const log = [
-        `\n\n %c  %c   ShinyColors Spine Viewer   %c  %c  https://github.com/ShinyColorsDB/ShinyColorsDB-SpineViewer  %c \n\n`,
+        `\n\n %c  %c   ShinyColors Spine Viewer (${PIXIrenderer}) %c  %c  https://github.com/ShinyColorsDB/ShinyColorsDB-SpineViewer  %c \n\n`,
         'background: #28de10; padding:5px 0;',
         'color: #28de10; background: #030307; padding:5px 0;',
         'background: #28de10; padding:5px 0;',
@@ -394,18 +398,22 @@ async function setupTypeList(dressObj) {
 async function testAndLoadAnimation(enzaId, type, flag = false) {
     if (!spineMap.has(`${enzaId}/${type}`)) {
         if (flag) {
-            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then(async (resource) => {
-                const waifu = resource.spineData;
-                spineMap.set(`${enzaId}/${type}`, waifu);
-                await setupAnimationList(waifu);
-            });
+            // 不知道這是幹什麼的 
+            // PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then(async (resource) => {
+            //     const waifu = resource.spineData;
+            //     spineMap.set(`${enzaId}/${type}`, waifu);
+            //     await setupAnimationList(waifu);
+            // });
         }
         else {
-            PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`).then(async (resource) => {
-                const waifu = resource.spineData;
-                spineMap.set(`${enzaId}/${type}`, waifu);
-                await setupAnimationList(waifu);
-            });
+            let label = `${enzaId}_${type}`;
+            PIXI.Assets.load([
+                {alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`},
+                {alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.atlas`}
+            ]).then(async ()=>{
+                spineMap.set(`${enzaId}/${type}`, label);
+                await setupAnimationList(label)
+            })
         }
     }
     else {
@@ -413,14 +421,17 @@ async function testAndLoadAnimation(enzaId, type, flag = false) {
     }
 }
 
-async function setupAnimationList(spineData) {
+async function setupAnimationList(spineLabel) {
     const animationList = document.getElementById("divAnimationBody");
     animationList.innerHTML = "";
 
     const defaultAnimation = "wait";
 
-    let currentSpine = new PIXI.spine.Spine(spineData),
-        hasWait = false;
+    let currentSpine = PIXI.Spine37.Spine.from({
+        skeleton : `skel_${spineLabel}`,
+        atlas : `atlas_${spineLabel}`,
+    })
+    let hasWait = false;
 
     try {
         currentSpine.skeleton.setSkinByName("normal");
@@ -428,7 +439,7 @@ async function setupAnimationList(spineData) {
         currentSpine.skeleton.setSkinByName("default");
     }
 
-    for (let [index, animation] of (spineData.animations).entries()) {
+    for (let [index, animation] of (currentSpine.skeleton.data.animations).entries()) {
         const div = document.createElement("div"),
             input = document.createElement("input"),
             label = document.createElement("label");
@@ -462,8 +473,8 @@ async function setupAnimationList(spineData) {
     }
 
     if (!hasWait) {
-        document.getElementById(currentSpine.spineData.animations[0].name).checked = true;
-        currentSpine.state.setAnimation(0, currentSpine.spineData.animations[0].name, true);
+        document.getElementById(currentSpine.skeleton.data.animations[0].name).checked = true;
+        currentSpine.state.setAnimation(0, currentSpine.skeleton.data.animations[0].name, true);
     }
 
     await renderToStage(currentSpine);
@@ -477,9 +488,11 @@ function animationOnChange(theInput, trackNo, currentSpine) {
     else {
         currentSpine.state.clearTrack(trackNo);
     }
-    currentSpine.skeleton.setToSetupPose();
-    currentSpine.update(0);
-    currentSpine.autoUpdate = true;
+    if (!currentSpine.autoUpdate){
+        currentSpine.skeleton.setToSetupPose();
+        currentSpine.update(0);
+        currentSpine.autoUpdate = true;
+    }
 }
 
 function blobToBase64(blob) {
@@ -496,13 +509,10 @@ const clearState = (spine) => {
 };
 async function renderToStage(currentSpine) {
     if (isContinuousShootingEnabled) { clearState(currentSpine) }
-    cont.removeChild(cont.children[0]);
+    cont.removeChildren();
     cont.addChild(currentSpine);
 
     const dressType = document.getElementById("typeList").value;
-    const spineLocalBound = currentSpine.getLocalBounds();
-
-    currentSpine.position.set(-spineLocalBound.x, -spineLocalBound.y);
 
     let scale = 0.9;
     switch (dressType) {
@@ -513,16 +523,91 @@ async function renderToStage(currentSpine) {
             break;
         case BIG0:
         case BIG1:
-            scale = (app.view.height / currentSpine.spineData.height) * 0.9;
+            scale = (app.view.height / currentSpine.skeleton.data.height) * 0.9;
             break;
     }
 
-    const contLocalBound = cont.getLocalBounds();
+    currentSpine.update(0);
+    //不知為何大部分的SC spine都無法獲得完整的Bound 出於下策用Graphics去骨架大小
+    const gp = createGraphics(currentSpine);
+    const gpBound = gp.getLocalBounds();
+    currentSpine.position.set(-gpBound.x, -gpBound.y);
+    //根據Graphics的Bound 用Sprite去繪製出範圍 用於截圖
+    const emptysprite = PIXI.Sprite.from(PIXI.Texture.EMPTY);
+    emptysprite.alpha = 0;
+    emptysprite.width = Math.max(currentSpine.skeleton.data.width, gpBound.width) + 50;
+    emptysprite.height = Math.max(currentSpine.skeleton.data.height, gpBound.height) + 20;
+    emptysprite.position.set(-25, -10);
+    cont.addChild(emptysprite);
+
     cont.scale.set(scale);
+    const contLocalBound = cont.getLocalBounds();
     cont.pivot.set(contLocalBound.width / 2, contLocalBound.height / 2);
     cont.position.set(app.view.width / 2, app.view.height / 2);
 
     if (isContinuousShootingEnabled) { await saveImage(); }
+}
+
+
+function createGraphics(spine){
+    const graphics = new PIXI.Graphics();
+    graphics.alpha = 0;
+
+    const skeleton = spine.skeleton;
+    const slots = skeleton.slots;
+    for (let i = 0, len = slots.length; i < len; i++) {
+        const slot = slots[i];
+
+        if (!slot.bone.isActive) {
+            continue;
+        }
+        const attachment = slot.getAttachment();
+
+        if (attachment === null || !(attachment instanceof PIXI.Spine37.MeshAttachment)) {
+            continue;
+        }
+
+        const meshAttachment = attachment;
+
+        const vertices = new Float32Array(meshAttachment.worldVerticesLength);
+        let hullLength = meshAttachment.hullLength;
+        const triangles = meshAttachment.triangles;
+
+        meshAttachment.computeWorldVertices(slot, 0, meshAttachment.worldVerticesLength, vertices, 0, 2);
+        // draw the skinned mesh (triangle)
+        
+        for (let i = 0, len = triangles.length; i < len; i += 3) {
+            const v1 = triangles[i] * 2;
+            const v2 = triangles[i + 1] * 2;
+            const v3 = triangles[i + 2] * 2;
+
+            graphics.context
+                .moveTo(vertices[v1], vertices[v1 + 1])
+                .lineTo(vertices[v2], vertices[v2 + 1])
+                .lineTo(vertices[v3], vertices[v3 + 1]);
+        }
+
+        // draw skin border
+        if (hullLength > 0) {
+            hullLength = (hullLength >> 1) * 2;
+            let lastX = vertices[hullLength - 2];
+            let lastY = vertices[hullLength - 1];
+
+            for (let i = 0, len = hullLength; i < len; i += 2) {
+                const x = vertices[i];
+                const y = vertices[i + 1];
+
+                graphics.context
+                    .moveTo(x, y)
+                    .lineTo(lastX, lastY);
+                lastX = x;
+                lastY = y;
+            }
+        }
+    }
+
+    graphics.stroke({ width: 1, color: 0xFFFFFF });
+    return graphics;
 }
 
 function resetAllAnimation() {
