@@ -73,9 +73,9 @@ async function createDropSpine(atlas, json, texture) {
     //textures
     const textureLoadingPromises = [];
     for (const page of textureAtlas.pages) {
-        
+
         const base64Texture = await blobToBase64(texture.get(page.name));
-        
+
         const pixiPromise = PIXI.Assets.load({
             alias: page.name,
             src: base64Texture,
@@ -403,7 +403,7 @@ async function setupTypeList(dressObj) {
 async function testAndLoadAnimation(enzaId, type, flag = false) {
     if (!spineMap.has(`${enzaId}/${type}`)) {
         if (flag) {
-            // 不知道這是幹什麼的 
+            // 不知道這是幹什麼的
             // PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then(async (resource) => {
             //     const waifu = resource.spineData;
             //     spineMap.set(`${enzaId}/${type}`, waifu);
@@ -412,13 +412,25 @@ async function testAndLoadAnimation(enzaId, type, flag = false) {
         }
         else {
             let label = `${enzaId}_${type}`;
-            PIXI.Assets.load([
-                {alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json`},
-                {alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.atlas`}
-            ]).then(async ()=>{
-                spineMap.set(`${enzaId}/${type}`, label);
-                await setupAnimationList(label)
-            })
+            if (enzaId[0] == '1') {
+                PIXI.Assets.load([
+                    { alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json` },
+                    { alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.atlas` }
+                ]).then(async () => {
+                    spineMap.set(`${enzaId}/${type}`, label);
+                    await setupAnimationList(label);
+                });
+            }
+            else if (enzaId[0] == '2') {
+                label = `${enzaId}_picture_motion`;
+                PIXI.Assets.load([
+                    { alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/support_idols/picture_motion/${enzaId}/data.json` },
+                    { alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/support_idols/picture_motion/${enzaId}/data.atlas` }
+                ]).then(async () => {
+                    spineMap.set(`${enzaId}/picture_motion`, label);
+                    await setupAnimationList(label);
+                });
+            }
         }
     }
     else {
@@ -580,7 +592,7 @@ function createGraphics(spine){
 
         meshAttachment.computeWorldVertices(slot, 0, meshAttachment.worldVerticesLength, vertices, 0, 2);
         // draw the skinned mesh (triangle)
-        
+
         for (let i = 0, len = triangles.length; i < len; i += 3) {
             const v1 = triangles[i] * 2;
             const v2 = triangles[i + 1] * 2;
