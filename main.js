@@ -53,7 +53,7 @@ function dropHandler(event) {
     if (pathAtlas && pathJSON && pathTexture.size > 0) {
         createDropSpine(pathAtlas, pathJSON, pathTexture);
     }
-    else{
+    else {
         alert("missing files!");
     }
 }
@@ -64,10 +64,10 @@ function dragOverHandler(event) {
 
 async function createDropSpine(atlas, json, texture) {
     //skel
-    const rawJSON = await PIXI.DOMAdapter.get().fetch(json).then((response)=>response.json());
+    const rawJSON = await PIXI.DOMAdapter.get().fetch(json).then((response) => response.json());
     PIXI.Assets.cache.set("skel_drop", rawJSON);
     //atlas
-    const rawAtlas = await PIXI.DOMAdapter.get().fetch(atlas).then((response)=>response.text());
+    const rawAtlas = await PIXI.DOMAdapter.get().fetch(atlas).then((response) => response.text());
     const textureAtlas = new PIXI.Spine37.TextureAtlas(rawAtlas);
     PIXI.Assets.cache.set("atlas_drop", textureAtlas);
     //textures
@@ -79,10 +79,10 @@ async function createDropSpine(atlas, json, texture) {
         const pixiPromise = PIXI.Assets.load({
             alias: page.name,
             src: base64Texture,
-            data : {
+            data: {
                 alphaMode: page.pma ? 'premultiplied-alpha' : 'premultiply-alpha-on-upload'
             }
-        }).then((rawtexture)=>{
+        }).then((rawtexture) => {
             page.setTexture(PIXI.Spine37.SpineTexture.from(rawtexture.source));
         })
 
@@ -138,7 +138,7 @@ async function init() {
     PIXIrenderer = urlParams.has('renderer') ? urlParams.get('renderer') : PIXIrenderer; // 'webgl', 'webgpu'
     app = new PIXI.Application();
     await app.init({
-        preference : PIXIrenderer,
+        preference: PIXIrenderer,
         view: canvas,
         width: canvas.clientWidth - 1,
         height: canvas.clientHeight - 1,
@@ -251,7 +251,7 @@ async function setupDressList(idolDressList) {
     dressList.innerHTML = "";
 
     let lastType = "P_SSR", optGroup = document.createElement("optgroup");
-        optGroup.label = "P_SSR";
+    optGroup.label = "P_SSR";
     let arrayOrder = 0;
 
     idolDressList.forEach((element, index) => {
@@ -403,25 +403,19 @@ async function setupTypeList(dressObj) {
 async function testAndLoadAnimation(enzaId, type, flag = false) {
     if (!spineMap.has(`${enzaId}/${type}`)) {
         if (flag) {
-            // 不知道這是幹什麼的
-            // PIXI.Assets.load(`https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`).then(async (resource) => {
-            //     const waifu = resource.spineData;
-            //     spineMap.set(`${enzaId}/${type}`, waifu);
-            //     await setupAnimationList(waifu);
-            // });
+            // staff 七草はづき 用的
+            let label = `${enzaId}`.replace('.json', '');
+            PIXI.Assets.load([
+                { alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}` },
+                { alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/sub_characters/${migrateMap[type]}/${enzaId}`.replace('.json', '.atlas') }
+            ]).then(async () => {
+                spineMap.set(`${enzaId}/picture_motion`, label);
+                await setupAnimationList(label);
+            });
         }
         else {
             let label = `${enzaId}_${type}`;
-            if (enzaId[0] == '1') {
-                PIXI.Assets.load([
-                    { alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json` },
-                    { alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.atlas` }
-                ]).then(async () => {
-                    spineMap.set(`${enzaId}/${type}`, label);
-                    await setupAnimationList(label);
-                });
-            }
-            else if (enzaId[0] == '2') {
+            if (enzaId[0] == '2') {
                 label = `${enzaId}_picture_motion`;
                 PIXI.Assets.load([
                     { alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/support_idols/picture_motion/${enzaId}/data.json` },
@@ -430,6 +424,14 @@ async function testAndLoadAnimation(enzaId, type, flag = false) {
                     spineMap.set(`${enzaId}/picture_motion`, label);
                     await setupAnimationList(label);
                 });
+            } else {
+                PIXI.Assets.load([
+                    { alias: `skel_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.json` },
+                    { alias: `atlas_${label}`, src: `https://cf-static.shinycolors.moe/spine/idols/${migrateMap[type]}/${enzaId}/data.atlas` }
+                ]).then(async (e) => {
+                    spineMap.set(`${enzaId}/${type}`, label);
+                    await setupAnimationList(label);
+                })
             }
         }
     }
@@ -445,8 +447,8 @@ async function setupAnimationList(spineLabel) {
     const defaultAnimation = "wait";
 
     let currentSpine = PIXI.Spine37.Spine.from({
-        skeleton : `skel_${spineLabel}`,
-        atlas : `atlas_${spineLabel}`,
+        skeleton: `skel_${spineLabel}`,
+        atlas: `atlas_${spineLabel}`,
     })
     let hasWait = false;
 
@@ -505,7 +507,7 @@ function animationOnChange(theInput, trackNo, currentSpine) {
     else {
         currentSpine.state.clearTrack(trackNo);
     }
-    if (!currentSpine.autoUpdate){
+    if (!currentSpine.autoUpdate) {
         currentSpine.skeleton.setToSetupPose();
         currentSpine.update(0);
         currentSpine.autoUpdate = true;
@@ -566,7 +568,7 @@ async function renderToStage(currentSpine) {
 }
 
 
-function createGraphics(spine){
+function createGraphics(spine) {
     const graphics = new PIXI.Graphics();
     graphics.alpha = 0;
 
