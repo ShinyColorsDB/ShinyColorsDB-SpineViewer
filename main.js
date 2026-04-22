@@ -7,6 +7,7 @@ let PIXIrenderer = 'webgpu'; //預設使用webgpu
 
 // State
 let isContinuousShootingEnabled = false
+let dropuid = 0;
 
 const idolMap = new Map();
 const spineMap = new Map();
@@ -63,13 +64,15 @@ function dragOverHandler(event) {
 }
 
 async function createDropSpine(atlas, json, texture) {
+    dropuid = dropuid + 1;
+
     //skel
     const rawJSON = await PIXI.DOMAdapter.get().fetch(json).then((response) => response.json());
-    PIXI.Assets.cache.set("skel_drop", rawJSON);
+    PIXI.Assets.cache.set(`skel_drop_${dropuid}`, rawJSON);
     //atlas
     const rawAtlas = await PIXI.DOMAdapter.get().fetch(atlas).then((response) => response.text());
     const textureAtlas = new PIXI.Spine37.TextureAtlas(rawAtlas);
-    PIXI.Assets.cache.set("atlas_drop", textureAtlas);
+    PIXI.Assets.cache.set(`atlas_drop_${dropuid}`, textureAtlas);
     //textures
     const textureLoadingPromises = [];
     for (const page of textureAtlas.pages) {
@@ -77,20 +80,20 @@ async function createDropSpine(atlas, json, texture) {
         const base64Texture = await blobToBase64(texture.get(page.name));
 
         const pixiPromise = PIXI.Assets.load({
-            alias: page.name,
+            alias: `${page.name}_${dropuid}`,
             src: base64Texture,
             data: {
                 alphaMode: page.pma ? 'premultiplied-alpha' : 'premultiply-alpha-on-upload'
             }
         }).then((rawtexture) => {
             page.setTexture(PIXI.Spine37.SpineTexture.from(rawtexture.source));
-        })
+        });
 
         textureLoadingPromises.push(pixiPromise);
     }
     await Promise.all(textureLoadingPromises);
 
-    await setupAnimationList('drop');
+    await setupAnimationList(`drop_${dropuid}`);
 }
 
 function toastInit() {
