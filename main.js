@@ -510,8 +510,8 @@ function animationOnChange(theInput, trackNo, currentSpine) {
     else {
         currentSpine.state.clearTrack(trackNo);
     }
+    currentSpine.skeleton.setToSetupPose();
     if (!currentSpine.autoUpdate) {
-        currentSpine.skeleton.setToSetupPose();
         currentSpine.update(0);
         currentSpine.autoUpdate = true;
     }
