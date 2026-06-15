@@ -70,7 +70,7 @@ export function useSpineRuntime(
     if (!initialized.value) await initApp()
 
     let cacheKey: string
-    if (isSubCharacter) cacheKey = `${enzaId}/sub_character`
+    if (isSubCharacter) cacheKey = `${enzaId}/sub_character/${type}`
     else if (enzaId[0] === '2') cacheKey = `${enzaId}/support_idol`
     else cacheKey = `${enzaId}/${type}`
 
@@ -89,7 +89,7 @@ export function useSpineRuntime(
       let atlasUrl: string
 
       if (isSubCharacter) {
-        label = enzaId.replace('.json', '')
+        label = `${enzaId.replace('.json', '')}_${type}`
         const baseType = DRESS_TYPE_MIGRATE[type]
         skelUrl = getSpineUrl(`/sub_characters/${baseType}/${enzaId}`)
         atlasUrl = skelUrl.replace('.json', '.atlas')

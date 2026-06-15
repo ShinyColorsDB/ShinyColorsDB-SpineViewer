@@ -121,8 +121,8 @@ describe('useSpineRuntime', () => {
     await runtime.loadSpine('chara1.json', 'sml_cloth0', true)
 
     expect(mockPIXI.Assets.load).toHaveBeenCalledWith([
-      { alias: 'skel_chara1', src: expect.stringContaining('/sub_characters/cb/chara1.json') },
-      { alias: 'atlas_chara1', src: expect.stringContaining('/sub_characters/cb/chara1.atlas') },
+      { alias: 'skel_chara1_sml_cloth0', src: expect.stringContaining('/sub_characters/cb/chara1.json') },
+      { alias: 'atlas_chara1_sml_cloth0', src: expect.stringContaining('/sub_characters/cb/chara1.atlas') },
     ])
   })
 
