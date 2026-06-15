@@ -166,6 +166,12 @@ describe('useUrlState', () => {
   })
 
   it('should generate a correct share link', () => {
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '', origin: 'https://spine.shinycolors.moe' },
+      writable: true,
+      configurable: true,
+    })
+
     const state = useUrlState()
 
     state.idolId.value = 5
@@ -177,7 +183,7 @@ describe('useUrlState', () => {
     const link = state.getShareLink()
     const url = new URL(link)
 
-    expect(url.origin).toBe('https://spine.shinycolors.moe')
+    expect(url.origin).toBe(window.location.origin)
     expect(url.searchParams.get('idolId')).toBe('5')
     expect(url.searchParams.get('enzaId')).toBe('123')
     expect(url.searchParams.get('dressType')).toBe('sml_cloth0')
