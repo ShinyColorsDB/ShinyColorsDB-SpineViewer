@@ -136,7 +136,7 @@ onUnmounted(() => {
         <n-text strong>技術諮詢</n-text>
         <n-text>TWY</n-text>
         <n-text strong>爆肝小夥伴</n-text>
-        <n-text>木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號</n-text>
+        <n-text>木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號 原田蜜柑</n-text>
       </n-space>
       <template #action>
         <n-space justify="end">
@@ -196,8 +196,8 @@ onUnmounted(() => {
     type="error"
     title="Save Failed"
     closable
-    @close="saveError = null"
     style="position: fixed; right: 16px; bottom: 60px; z-index: 50; width: 240px"
+    @close="saveError = null"
   >
     {{ saveError }}
   </n-alert>

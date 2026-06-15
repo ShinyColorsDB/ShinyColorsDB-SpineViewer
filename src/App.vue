@@ -5,7 +5,9 @@ import type { BuiltInGlobalTheme } from 'naive-ui/lib/themes/interface'
 import { naiveThemeOverrides } from './theme/naiveTheme'
 
 const osTheme = useOsTheme()
-const theme = computed<BuiltInGlobalTheme | null>(() => osTheme.value === 'dark' ? darkTheme : null)
+const theme = computed<BuiltInGlobalTheme | null>(() =>
+  osTheme.value === 'dark' ? darkTheme : null
+)
 </script>
 
 <template>
