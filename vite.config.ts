@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
-    vueDevTools({ launchEditor: 'webstorm' }),
+    vueDevTools(),
     AutoImport({
       imports: [
         'vue',
