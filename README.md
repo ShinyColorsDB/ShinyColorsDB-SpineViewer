@@ -1,5 +1,3 @@
 # ShinyColorsDB-SpineViewer
 
-[demo Website](https://spine.shinycolors.moe)
-
-![](https://i.imgur.com/XtXRzsd.png)
+![pasted-image-1773239439104.webp](https://files.seeusercontent.com/2026/03/11/w8fZ/pasted-image-1773239439104.webp)
