@@ -135,7 +135,7 @@ export function useUrlState() {
     }
     params.set('bgColor', backgroundColor.value)
     params.set('continuousShootingEnabled', String(continuousShootingEnabled.value))
-    return `https://spine.shinycolors.moe/?${params.toString()}`
+    return `${window.location.origin}/?${params.toString()}`
   }
 
   watch(

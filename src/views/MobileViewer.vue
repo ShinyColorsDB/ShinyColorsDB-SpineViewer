@@ -68,7 +68,12 @@ onUnmounted(() => {
       v-if="error"
       type="error"
       title="Load Failed"
-      style="position: absolute; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom, 0px))"
+      style="
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+      "
     >
       {{ error.message }}
     </n-alert>
@@ -104,7 +109,6 @@ onUnmounted(() => {
       type="error"
       title="Save Failed"
       closable
-      @close="saveError = null"
       style="
         position: fixed;
         left: 50%;
@@ -113,6 +117,7 @@ onUnmounted(() => {
         z-index: 50;
         width: min(320px, calc(100vw - 24px));
       "
+      @close="saveError = null"
     >
       {{ saveError }}
     </n-alert>
@@ -135,7 +140,7 @@ onUnmounted(() => {
         <n-text strong>技術諮詢</n-text>
         <n-text>TWY</n-text>
         <n-text strong>爆肝小夥伴</n-text>
-        <n-text>木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號</n-text>
+        <n-text>木下梨花 KaiOuO Lycoris 剎那 十秒十六胎 匿名小夥伴一號 原田蜜柑</n-text>
       </n-space>
       <template #action>
         <n-space justify="end">
