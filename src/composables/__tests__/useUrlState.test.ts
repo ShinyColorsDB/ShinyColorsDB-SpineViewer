@@ -74,10 +74,10 @@ describe('useUrlState', () => {
 
     const state = useUrlState()
 
-    expect(state.idolId.value).toBe(1) // Default
-    expect(state.dressType.value).toBeUndefined() // Default
-    expect(state.renderer.value).toBe('webgpu') // Default
-    expect(state.backgroundColor.value).toBe('#000000') // Default
+    expect(state.idolId.value).toBe(1) // Default (invalid number)
+    expect(state.dressType.value).toBe('invalid_type') // Accepts any string (asset paths, etc.)
+    expect(state.renderer.value).toBe('webgpu') // Default (invalid renderer)
+    expect(state.backgroundColor.value).toBe('#000000') // Default (invalid hex)
   })
 
   it('should parse valid values from localStorage', () => {

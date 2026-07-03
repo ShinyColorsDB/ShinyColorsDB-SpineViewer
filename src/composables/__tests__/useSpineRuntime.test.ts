@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-// import { useSpineRuntime } from '../useSpineRuntime'
 import { ref } from 'vue'
 
 describe('useSpineRuntime', () => {
@@ -15,6 +14,8 @@ describe('useSpineRuntime', () => {
         background: { color: '0x000000' },
         name: 'mock-renderer',
         resize: vi.fn(),
+        width: 800,
+        height: 600,
       },
       init: vi.fn().mockResolvedValue(undefined),
       ticker: { start: vi.fn(), stop: vi.fn(), update: vi.fn() },
@@ -28,7 +29,13 @@ describe('useSpineRuntime', () => {
         return mockApp
       }),
       Container: vi.fn().mockImplementation(function () {
-        return {}
+        return {
+          removeChildren: vi.fn(),
+          addChild: vi.fn(),
+          scale: { set: vi.fn() },
+          pivot: { set: vi.fn() },
+          position: { set: vi.fn() },
+        }
       }),
       Assets: {
         load: vi.fn().mockResolvedValue({
@@ -39,10 +46,28 @@ describe('useSpineRuntime', () => {
         add: vi.fn().mockResolvedValue(undefined),
         get: vi.fn(),
       },
-      Graphics: vi.fn().mockImplementation(() => ({
-        rect: vi.fn().mockReturnThis(),
-        fill: vi.fn().mockReturnThis(),
-      })),
+      Graphics: vi.fn().mockImplementation(function () {
+        return {
+          rect: vi.fn().mockReturnThis(),
+          fill: vi.fn().mockReturnThis(),
+          alpha: 0,
+          context: {
+            moveTo: vi.fn().mockReturnThis(),
+            lineTo: vi.fn().mockReturnThis(),
+          },
+          stroke: vi.fn(),
+          getLocalBounds: vi.fn().mockReturnValue({ width: 100, height: 100, x: 0, y: 0 }),
+        }
+      }),
+      Sprite: {
+        from: vi.fn().mockReturnValue({
+          alpha: 0,
+          width: 0,
+          height: 0,
+          position: { set: vi.fn() },
+        }),
+      },
+      Texture: { EMPTY: {} },
     }
 
     // Assign mock PIXI to global
@@ -62,20 +87,24 @@ describe('useSpineRuntime', () => {
       Spine: {
         from: vi.fn().mockReturnValue({
           state: { setAnimation: vi.fn(), clearTracks: vi.fn(), clearTrack: vi.fn() },
-          getBounds: vi.fn().mockReturnValue({ offset: { x: 0, y: 0 }, size: { x: 100, y: 100 } }),
-          position: { x: 0, y: 0 },
+          getLocalBounds: vi.fn().mockReturnValue({ width: 100, height: 100, x: 0, y: 0 }),
+          position: { set: vi.fn(), x: 0, y: 0 },
           scale: { x: 1, y: 1 },
           autoUpdate: true,
           update: vi.fn(),
           skeleton: {
             setSkinByName: vi.fn(),
             setToSetupPose: vi.fn(),
+            slots: [],
             data: {
               animations: [{ name: 'wait' }, { name: 'talk' }],
+              width: 100,
+              height: 100,
             },
           },
         }),
       },
+      MeshAttachment: class {},
     }
 
     // Reset module cache
@@ -88,42 +117,60 @@ describe('useSpineRuntime', () => {
 
     const runtime = useSpineRuntime(canvasRef, ref('webgl'))
 
-    await runtime.loadSpine('123', 'sml_cloth0')
+    await runtime.loadSpine('1040030010', 'spine/idols/stand/1040030010/')
 
     expect(mockPIXI.Application).toHaveBeenCalled()
     expect(mockApp.init).toHaveBeenCalled()
   })
 
-  it('should use support idol urls for enzaId starting with 2', async () => {
+  it('should use assetPath directly to construct URLs', async () => {
     const { useSpineRuntime } = await import('../useSpineRuntime')
     const canvasRef = ref(document.createElement('canvas'))
     const runtime = useSpineRuntime(canvasRef, ref('webgpu'))
 
-    await runtime.loadSpine('201', 'sml_cloth0')
+    await runtime.loadSpine('1040030010', 'spine/idols/cb/1040030010/')
 
     expect(mockPIXI.Assets.load).toHaveBeenCalledWith([
       {
-        alias: 'skel_201_picture_motion',
-        src: expect.stringContaining('/support_idols/picture_motion/201/data.json'),
+        alias: expect.stringContaining('skel_'),
+        src: expect.stringContaining('/spine/idols/cb/1040030010/data.json'),
       },
       {
-        alias: 'atlas_201_picture_motion',
-        src: expect.stringContaining('/support_idols/picture_motion/201/data.atlas'),
+        alias: expect.stringContaining('atlas_'),
+        src: expect.stringContaining('/spine/idols/cb/1040030010/data.atlas'),
       },
     ])
   })
 
-  it('should use sub_character urls when isSubCharacter is true', async () => {
+  it('should use awake_idols path directly', async () => {
     const { useSpineRuntime } = await import('../useSpineRuntime')
     const canvasRef = ref(document.createElement('canvas'))
     const runtime = useSpineRuntime(canvasRef, ref('webgpu'))
 
-    await runtime.loadSpine('chara1.json', 'sml_cloth0', true)
+    await runtime.loadSpine('1040030110', 'spine/awake_idols/cb_costume/1040030110/')
 
     expect(mockPIXI.Assets.load).toHaveBeenCalledWith([
-      { alias: 'skel_chara1_sml_cloth0', src: expect.stringContaining('/sub_characters/cb/chara1.json') },
-      { alias: 'atlas_chara1_sml_cloth0', src: expect.stringContaining('/sub_characters/cb/chara1.atlas') },
+      {
+        alias: expect.stringContaining('skel_'),
+        src: expect.stringContaining('/spine/awake_idols/cb_costume/1040030110/data.json'),
+      },
+      {
+        alias: expect.stringContaining('atlas_'),
+        src: expect.stringContaining('/spine/awake_idols/cb_costume/1040030110/data.atlas'),
+      },
     ])
+  })
+
+  it('should cache spine data and reuse on second load', async () => {
+    const { useSpineRuntime } = await import('../useSpineRuntime')
+    const canvasRef = ref(document.createElement('canvas'))
+    const runtime = useSpineRuntime(canvasRef, ref('webgpu'))
+
+    await runtime.loadSpine('123', 'spine/idols/stand/123/')
+    await runtime.loadSpine('123', 'spine/idols/stand/123/')
+
+    // Assets.load should only be called once for the same path
+    expect(mockPIXI.Assets.load).toHaveBeenCalledTimes(1)
   })
 
   it('should toggle animations correctly', async () => {
@@ -131,7 +178,7 @@ describe('useSpineRuntime', () => {
     const canvasRef = ref(document.createElement('canvas'))
     const runtime = useSpineRuntime(canvasRef, ref('webgpu'))
 
-    await runtime.loadSpine('123', 'sml_cloth0') // Loads 'wait' by default
+    await runtime.loadSpine('123', 'spine/idols/stand/123/')
 
     runtime.toggleAnimation(1, true) // Toggle 'talk'
     const talkAnimation = runtime.animations.value?.[1]

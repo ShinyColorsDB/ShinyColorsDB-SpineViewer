@@ -3,8 +3,7 @@ import { useExport } from './useExport'
 import { useIdolData } from './useIdolData'
 import { useSpineRuntime } from './useSpineRuntime'
 import { useUrlState } from './useUrlState'
-import type { DressInfo, DressTypeKey, IdolInfo } from '../types'
-import { DRESS_TYPE_LABELS } from '../types'
+import type { DressInfo, IdolInfo, SpineAssetEntry } from '../types'
 
 declare global {
   interface Window {
@@ -25,19 +24,137 @@ export type ViewerSelectGroupOption = {
   children: ViewerSelectOption[]
 }
 
-const DRESS_TYPE_FIELDS: Array<{ value: DressTypeKey; field: keyof DressInfo }> = [
-  { value: 'sml_cloth0', field: 'sml_Cloth0' },
-  { value: 'sml_cloth1', field: 'sml_Cloth1' },
-  { value: 'big_cloth0', field: 'big_Cloth0' },
-  { value: 'big_cloth1', field: 'big_Cloth1' },
-]
+const SPINE_TYPE_LABELS: Record<string, string> = {
+  cb: 'Q版_通常服',
+  cb_costume: 'Q版_演出服',
+  stand: '一般_通常服',
+  stand_costume: '一般_演出服',
+}
 
-const DRESS_TYPE_FALLBACK_ORDER: DressTypeKey[] = [
-  'big_cloth0',
-  'big_cloth1',
-  'sml_cloth0',
-  'sml_cloth1',
-]
+const ASSET_CATEGORY_LABELS: Record<string, string> = {
+  idols: '',
+  awake_idols: '覚醒',
+  idol_evolution_skins: '進化',
+  support_idols: 'サポート',
+}
+
+const DEFAULT_TYPE_PREFERENCE = ['stand', 'stand_costume', 'cb', 'cb_costume']
+
+interface TypeOption {
+  value: string
+  label: string
+}
+
+function getSpineTypeLabel(spineType: string): string {
+  return SPINE_TYPE_LABELS[spineType] ?? spineType
+}
+
+function buildAssetTypeLabel(category: string, spineType: string, index?: number): string {
+  const categoryLabel = ASSET_CATEGORY_LABELS[category] ?? category
+  const typeLabel = getSpineTypeLabel(spineType)
+  if (categoryLabel && index !== undefined) {
+    return `${categoryLabel}${index + 1}_${typeLabel}`
+  }
+  if (categoryLabel) {
+    return `${categoryLabel}_${typeLabel}`
+  }
+  return typeLabel
+}
+
+function buildTypeOptionsFromAssets(assets: DressInfo['assets']): TypeOption[] {
+  if (!assets) return []
+
+  const options: TypeOption[] = []
+
+  // idols entries
+  if (assets.idols) {
+    for (const entry of assets.idols) {
+      if (entry.path) {
+        options.push({
+          value: entry.path,
+          label: buildAssetTypeLabel('idols', entry.type),
+        })
+      }
+    }
+  }
+
+  // awake_idols entries
+  if (assets.awake_idols) {
+    for (const entry of assets.awake_idols) {
+      if (entry.path) {
+        options.push({
+          value: entry.path,
+          label: buildAssetTypeLabel('awake_idols', entry.type),
+        })
+      }
+    }
+  }
+
+  // idol_evolution_skins entries (grouped by type with indices)
+  if (assets.idol_evolution_skins) {
+    const byType = new Map<string, SpineAssetEntry[]>()
+    for (const entry of assets.idol_evolution_skins) {
+      if (!entry.path) continue
+      const list = byType.get(entry.type) ?? []
+      list.push(entry)
+      byType.set(entry.type, list)
+    }
+
+    for (const [spineType, entries] of byType) {
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i]!
+        options.push({
+          value: entry.path!,
+          label: buildAssetTypeLabel('idol_evolution_skins', spineType, i),
+        })
+      }
+    }
+  }
+
+  // support_idols entries
+  if (assets.support_idols) {
+    for (const entry of assets.support_idols) {
+      if (entry.path) {
+        options.push({
+          value: entry.path,
+          label: buildAssetTypeLabel('support_idols', entry.type),
+        })
+      }
+    }
+  }
+
+  return options
+}
+
+function getDefaultAssetPath(assets: DressInfo['assets']): string | undefined {
+  if (!assets) return undefined
+
+  // Prefer support_idols stand_costume (サポート_一般_通常服) if available
+  if (assets.support_idols) {
+    const supportEntry = assets.support_idols.find((e) => e.type === 'stand' && e.path) || assets.support_idols.find((e) => e.type === 'picture_motion' && e.path)
+    if (supportEntry) {
+      return supportEntry.path
+    }
+    else {
+      // return first element
+      const firstSupportEntry = assets.support_idols.find((e) => e.path)
+      if (firstSupportEntry) {
+        return firstSupportEntry.path
+      }
+    }
+  }
+
+  if (!assets.idols) return undefined
+
+  for (const preferred of DEFAULT_TYPE_PREFERENCE) {
+    const entry = assets.idols.find((e) => e.type === preferred && e.path)
+    if (entry) return entry.path
+  }
+
+  // Fallback to first entry with a path
+  const first = assets.idols.find((e) => e.path)
+  return first?.path
+}
 
 export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>) {
   const {
@@ -89,7 +206,27 @@ export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>)
       }
       groups[groupKey].push({ ...dress, index })
     })
-    return Object.entries(groups).map(([label, items]) => ({ label, items }))
+    const DRESS_TYPE_ORDER: string[] = [
+      'P_UR',
+      'S_UR',
+      'P_SSR',
+      'S_SSR',
+      'P_SR',
+      'Mizugi',
+      'Special',
+      'Anniversary',
+      'FesReward',
+      'FesTour',
+    ]
+    return Object.entries(groups)
+      .sort(([a], [b]) => {
+        const aIdx = DRESS_TYPE_ORDER.indexOf(a)
+        const bIdx = DRESS_TYPE_ORDER.indexOf(b)
+        const aOrder = aIdx >= 0 ? aIdx : DRESS_TYPE_ORDER.length
+        const bOrder = bIdx >= 0 ? bIdx : DRESS_TYPE_ORDER.length
+        return aOrder - bOrder
+      })
+      .map(([label, items]) => ({ label, items }))
   })
 
   const idolOptions = computed<ViewerSelectOption[]>(() =>
@@ -118,12 +255,9 @@ export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>)
     () => dressList.value[selectedDressIndex.value]
   )
 
-  const typeList = computed(() => {
+  const typeList = computed<TypeOption[]>(() => {
     if (!currentDress.value) return []
-    return resolveAvailableDressTypes(currentDress.value).map((value) => ({
-      value,
-      label: DRESS_TYPE_LABELS[value],
-    }))
+    return buildTypeOptionsFromAssets(currentDress.value.assets)
   })
 
   const typeOptions = computed<ViewerSelectOption[]>(() =>
@@ -184,30 +318,20 @@ export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>)
     await loadCurrentSpine()
   }
 
-  function getDefaultDressType(dress: DressInfo): DressTypeKey {
-    const availableTypes = resolveAvailableDressTypes(dress)
-    const preferredType = DRESS_TYPE_FALLBACK_ORDER.find((type) => availableTypes.includes(type))
-    return preferredType ?? 'big_cloth0'
-  }
-
   async function loadCurrentSpine() {
     const dress = currentDress.value
     if (!dress) return
 
     enzaId.value = dress.enzaId
 
-    const availableTypes = resolveAvailableDressTypes(dress)
+    const availableTypes = typeList.value.map((t) => t.value)
     const type =
       dressType.value && availableTypes.includes(dressType.value)
         ? dressType.value
-        : getDefaultDressType(dress)
+        : getDefaultAssetPath(dress.assets)
     dressType.value = type
 
-    if (dress.idolId === 0 && dress.path) {
-      await loadSpine(dress.path, type, true)
-      setBackgroundColor(backgroundColor.value)
-      return
-    }
+    if (!type) return
 
     await loadSpine(dress.enzaId, type)
     setBackgroundColor(backgroundColor.value)
@@ -231,7 +355,7 @@ export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>)
     await loadCurrentSpine()
   }
 
-  async function handleTypeChange(newType: DressTypeKey) {
+  async function handleTypeChange(newType: string) {
     dressType.value = newType
     await loadCurrentSpine()
   }
@@ -250,7 +374,7 @@ export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>)
 
   function updateType(value: string | number | null) {
     if (typeof value === 'string') {
-      void handleTypeChange(value as DressTypeKey)
+      void handleTypeChange(value)
     }
   }
 
@@ -342,13 +466,4 @@ export function useViewerShared(canvasElementRef: Ref<HTMLCanvasElement | null>)
     updateType,
     destroy,
   }
-}
-function resolveAvailableDressTypes(dress: DressInfo | undefined): DressTypeKey[] {
-  if (!dress) return []
-
-  const availableTypes = DRESS_TYPE_FIELDS.filter(({ field }) => Boolean(dress[field])).map(
-    ({ value }) => value
-  )
-
-  return availableTypes.length > 0 ? availableTypes : DRESS_TYPE_FALLBACK_ORDER
 }

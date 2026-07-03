@@ -1,6 +1,5 @@
 import { ref, shallowRef, type Ref } from 'vue'
-import type { DressTypeKey, AnimationItem } from '../types'
-import { DRESS_TYPE_MIGRATE } from '../types'
+import type { AnimationItem } from '../types'
 import { getSpineUrl } from '../config'
 
 declare global {
@@ -66,16 +65,14 @@ export function useSpineRuntime(
     }
   }
 
-  async function loadSpine(enzaId: string, type: DressTypeKey, isSubCharacter = false) {
+  async function loadSpine(enzaId: string, assetPath: string) {
+    void enzaId // kept for potential future cache labeling
     if (!initialized.value) await initApp()
 
-    let cacheKey: string
-    if (isSubCharacter) cacheKey = `${enzaId}/sub_character/${type}`
-    else if (enzaId[0] === '2') cacheKey = `${enzaId}/support_idol`
-    else cacheKey = `${enzaId}/${type}`
+    const cacheKey = assetPath
 
     if (spineCache.has(cacheKey)) {
-      await setupAnimationList(spineCache.get(cacheKey)!, type)
+      await setupAnimationList(spineCache.get(cacheKey)!)
       return
     }
 
@@ -84,35 +81,18 @@ export function useSpineRuntime(
 
     try {
       const PIXI = window.PIXI
-      let label: string
-      let skelUrl: string
-      let atlasUrl: string
 
-      if (isSubCharacter) {
-        label = `${enzaId.replace('.json', '')}_${type}`
-        const baseType = DRESS_TYPE_MIGRATE[type]
-        skelUrl = getSpineUrl(`/sub_characters/${baseType}/${enzaId}`)
-        atlasUrl = skelUrl.replace('.json', '.atlas')
-        spineCache.set(cacheKey, label)
-      } else if (enzaId[0] === '2') {
-        label = `${enzaId}_picture_motion`
-        skelUrl = getSpineUrl(`/support_idols/picture_motion/${enzaId}/data.json`)
-        atlasUrl = getSpineUrl(`/support_idols/picture_motion/${enzaId}/data.atlas`)
-        spineCache.set(cacheKey, label)
-      } else {
-        label = `${enzaId}_${type}`
-        const baseType = DRESS_TYPE_MIGRATE[type]
-        skelUrl = getSpineUrl(`/idols/${baseType}/${enzaId}/data.json`)
-        atlasUrl = getSpineUrl(`/idols/${baseType}/${enzaId}/data.atlas`)
-        spineCache.set(cacheKey, label)
-      }
+      const label = cacheKey.replace(/[\/.]/g, '_')
+      const skelUrl = getSpineUrl(`/${assetPath}data.json`)
+      const atlasUrl = getSpineUrl(`/${assetPath}data.atlas`)
+      spineCache.set(cacheKey, label)
 
       await PIXI.Assets.load([
         { alias: `skel_${label}`, src: skelUrl },
         { alias: `atlas_${label}`, src: atlasUrl },
       ])
 
-      await setupAnimationList(label, type)
+      await setupAnimationList(label)
     } catch (e) {
       error.value = e as Error
       console.error('Failed to load spine:', e)
@@ -121,7 +101,7 @@ export function useSpineRuntime(
     }
   }
 
-  async function setupAnimationList(spineLabel: string, dressType?: DressTypeKey) {
+  async function setupAnimationList(spineLabel: string) {
     const PIXI = window.PIXI
 
     const spine = PIXI.Spine37.Spine.from({
@@ -150,20 +130,26 @@ export function useSpineRuntime(
         trackIndex: index,
         checked: isWait,
       })
-
-      if (isWait) spine.state.setAnimation(index, name, true)
     }
 
     if (!hasWait && anims.length > 0) {
       const firstAnim = anims[0]
       if (firstAnim) {
         firstAnim.checked = true
-        spine.state.setAnimation(0, firstAnim.name, true)
       }
     }
 
     animations.value = anims
-    await renderToStage(spine, dressType)
+
+    // Render to stage first (this calls spine.update(0) for bounds calculation)
+    await renderToStage(spine)
+
+    // Apply animations AFTER rendering so spine.update(0) doesn't interfere
+    for (const anim of anims) {
+      if (anim.checked) {
+        spine.state.setAnimation(anim.trackIndex, anim.name, true)
+      }
+    }
   }
 
   function toggleAnimation(trackIndex: number, checked: boolean) {
@@ -180,8 +166,8 @@ export function useSpineRuntime(
     if (checked) currentSpine.value.state.setAnimation(trackIndex, anim.name, true)
     else currentSpine.value.state.clearTrack(trackIndex)
 
+    currentSpine.value.skeleton.setToSetupPose()
     if (!currentSpine.value.autoUpdate) {
-      currentSpine.value.skeleton.setToSetupPose()
       currentSpine.value.update(0)
       currentSpine.value.autoUpdate = true
     }
@@ -277,7 +263,7 @@ export function useSpineRuntime(
     return graphics
   }
 
-  async function renderToStage(spine: any, _dressType?: DressTypeKey) {
+  async function renderToStage(spine: any) {
     if (!app.value || !container.value) return
 
     const PIXI = window.PIXI
@@ -390,7 +376,7 @@ export function useSpineRuntime(
       app.value.renderer.resize(canvasRef.value.clientWidth, canvasRef.value.clientHeight)
       if (currentSpine.value) {
         const anim = animations.value.find((a) => a.checked)
-        if (anim) renderToStage(currentSpine.value, undefined)
+        if (anim) renderToStage(currentSpine.value)
       }
     }
   }

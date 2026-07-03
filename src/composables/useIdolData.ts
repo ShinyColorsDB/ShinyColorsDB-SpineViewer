@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import type { IdolInfo, DressInfo } from '../types'
-import { API_BASE_URL, CF_BASE_URL } from '../config'
+import { API_BASE_URL } from '../config'
 
 const idolInfoMap = ref<Map<number, IdolInfo> | null>(null)
 const idolDressMap = ref<Map<string, DressInfo[]>>(new Map())
@@ -43,14 +43,8 @@ export function useIdolData() {
     error.value = null
 
     try {
-      let data: DressInfo[]
-      if (idolId === 91) {
-        const response = await fetch(`${CF_BASE_URL}/others/hazuki.json`)
-        data = await response.json()
-      } else {
-        const response = await fetch(`${API_BASE_URL}/dressList?idolId=${idolId}`)
-        data = await response.json()
-      }
+      const response = await fetch(`${API_BASE_URL}/dresslist?idolId=${idolId}`)
+      const data: DressInfo[] = await response.json()
       idolDressMap.value.set(idolName, data)
       return data
     } catch (e) {

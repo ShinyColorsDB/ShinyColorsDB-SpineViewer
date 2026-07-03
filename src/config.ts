@@ -5,7 +5,7 @@ export const API_BASE_URL = USE_PROXY ? '/api' : 'https://api.shinycolors.moe/sp
 export const CF_BASE_URL = USE_PROXY ? '/cf' : 'https://cf-static.shinycolors.moe'
 
 export function getSpineUrl(path: string): string {
-  const base = USE_PROXY ? '/spine' : 'https://cf-static.shinycolors.moe/spine'
+  const base = USE_PROXY ? '/spine' : 'https://cf-static.shinycolors.moe'
   return `${base}${path.startsWith('/') ? path : '/' + path}`
 }
 

@@ -1,12 +1,7 @@
 import { ref, watch } from 'vue'
-import type { DressTypeKey, UrlParams } from '../types'
+import type { UrlParams } from '../types'
 
 const STATE_STORAGE_KEY = 'shinycolors-spine-viewer-state'
-const DRESS_TYPES: DressTypeKey[] = ['sml_cloth0', 'sml_cloth1', 'big_cloth0', 'big_cloth1']
-
-function isDressTypeKey(value: unknown): value is DressTypeKey {
-  return typeof value === 'string' && DRESS_TYPES.includes(value as DressTypeKey)
-}
 
 function isRenderer(value: unknown): value is 'webgl' | 'webgpu' {
   return value === 'webgl' || value === 'webgpu'
@@ -33,7 +28,7 @@ function readUrlParams(): UrlParams {
   }
 
   const dressType = urlParams.get('dressType')
-  if (isDressTypeKey(dressType)) {
+  if (dressType) {
     params.dressType = dressType
   }
 
@@ -68,7 +63,7 @@ function readStoredParams(): UrlParams {
     if (typeof parsed.enzaId === 'string' && parsed.enzaId) {
       params.enzaId = parsed.enzaId
     }
-    if (isDressTypeKey(parsed.dressType)) {
+    if (typeof parsed.dressType === 'string' && parsed.dressType) {
       params.dressType = parsed.dressType
     }
     if (isRenderer(parsed.renderer)) {
@@ -101,7 +96,7 @@ export function useUrlState() {
   const initial = getInitialParams()
   const idolId = ref<number | undefined>(initial.idolId ?? 1)
   const enzaId = ref<string | undefined>(initial.enzaId)
-  const dressType = ref<DressTypeKey | undefined>(initial.dressType)
+  const dressType = ref<string | undefined>(initial.dressType)
   // Mobile devices always use WebGL regardless of stored preference:
   // WebGPU on Android (Vulkan/Dawn) has canvas format mismatch issues that
   // cause extract.canvas() to fail silently, breaking screenshot export.

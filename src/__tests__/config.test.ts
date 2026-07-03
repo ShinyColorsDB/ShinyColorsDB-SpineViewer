@@ -16,8 +16,8 @@ describe('config.ts', () => {
     expect(CF_BASE_URL).toBe('https://cf-static.shinycolors.moe')
 
     // Test getSpineUrl
-    expect(getSpineUrl('/some/path')).toBe('https://cf-static.shinycolors.moe/spine/some/path')
-    expect(getSpineUrl('some/path')).toBe('https://cf-static.shinycolors.moe/spine/some/path')
+    expect(getSpineUrl('/some/path')).toBe('https://cf-static.shinycolors.moe/some/path')
+    expect(getSpineUrl('some/path')).toBe('https://cf-static.shinycolors.moe/some/path')
   })
 
   it('should use proxy paths when VITE_USE_PROXY is true', async () => {

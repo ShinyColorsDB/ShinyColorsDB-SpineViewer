@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 // import { useIdolData } from '../useIdolData'
-import { API_BASE_URL, CF_BASE_URL } from '../../config'
+import { API_BASE_URL } from '../../config'
 import type { IdolInfo, DressInfo } from '../../types'
 
 describe('useIdolData', () => {
@@ -37,12 +37,24 @@ describe('useIdolData', () => {
     expect(map2).toEqual(map1) // Same Map instance
   })
 
-  it('should fetch and cache dress list for normal idol', async () => {
+  it('should fetch and cache dress list', async () => {
     const module = await import('../useIdolData')
     const { useIdolData } = module
 
     const mockDressData: DressInfo[] = [
-      { idolId: 1, dressName: 'Dress 1', dressType: 'type1', enzaId: '101', exist: true },
+      {
+        idolId: 1,
+        dressName: 'Dress 1',
+        dressType: 'type1',
+        enzaId: '101',
+        exist: true,
+        assets: {
+          idols: [
+            { path: 'spine/idols/cb/101/', type: 'cb' },
+            { path: 'spine/idols/stand/101/', type: 'stand' },
+          ],
+        },
+      },
     ]
 
     ;(globalThis.fetch as any).mockResolvedValueOnce({
@@ -53,37 +65,16 @@ describe('useIdolData', () => {
 
     const list1 = await fetchDressList(1, 'Mano')
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
-    expect(globalThis.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/dressList?idolId=1`)
+    expect(globalThis.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/dresslist?idolId=1`)
     expect(list1).toHaveLength(1)
     expect(list1[0]).toBeDefined()
     expect(list1[0]!.dressName).toBe('Dress 1')
+    expect(list1[0]!.assets.idols).toHaveLength(2)
 
     // Second call for same idol should return cached data
     const list2 = await fetchDressList(1, 'Mano')
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
     expect(list2).toEqual(list1)
-  })
-
-  it('should fetch hazuki data from special endpoint when idolId is 91', async () => {
-    const module = await import('../useIdolData')
-    const { useIdolData } = module
-
-    const mockHazukiData: DressInfo[] = [
-      { idolId: 91, dressName: 'Hazuki Normal', dressType: 'type', enzaId: '91', exist: true },
-    ]
-
-    ;(globalThis.fetch as any).mockResolvedValueOnce({
-      json: vi.fn().mockResolvedValue(mockHazukiData),
-    })
-
-    const { fetchDressList } = useIdolData()
-
-    const list = await fetchDressList(91, 'Hazuki')
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
-    expect(globalThis.fetch).toHaveBeenCalledWith(`${CF_BASE_URL}/others/hazuki.json`)
-    expect(list).toHaveLength(1)
-    expect(list[0]).toBeDefined()
-    expect(list[0]!.dressName).toBe('Hazuki Normal')
   })
 
   it('should handle fetch errors and update error state', async () => {

@@ -7,12 +7,12 @@ describe('ViewerControls.vue', () => {
   const defaultProps = {
     idolId: 1,
     selectedDressIndex: 0,
-    dressType: 'sml_cloth0',
+    dressType: 'spine/idols/stand/101/',
     backgroundColor: '#000000',
     continuousShootingEnabled: false,
     idolOptions: [{ label: 'Idol 1', value: 1 }],
     dressOptions: [{ label: 'Dress 1', items: [] }],
-    typeOptions: [{ label: 'Type 1', value: 'sml_cloth0' }],
+    typeOptions: [{ label: '一般_通常服', value: 'spine/idols/stand/101/' }],
     showActionButtons: true,
   }
 
@@ -55,9 +55,9 @@ describe('ViewerControls.vue', () => {
     expect((wrapper.emitted('update:dress') as any[])[0]).toEqual([1])
 
     // Trigger update on Type select
-    await selects?.[2]?.vm.$emit('update:value', 'big_cloth0')
+    await selects?.[2]?.vm.$emit('update:value', 'spine/idols/cb/101/')
     expect(wrapper.emitted('update:type') as any[]).toBeTruthy()
-    expect((wrapper.emitted('update:type') as any[])[0]).toEqual(['big_cloth0'])
+    expect((wrapper.emitted('update:type') as any[])[0]).toEqual(['spine/idols/cb/101/'])
 
     // Check Color Picker
     const colorPicker = wrapper.findComponent(NColorPicker)
