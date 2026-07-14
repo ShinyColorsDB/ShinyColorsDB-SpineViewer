@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://api.shinycolors.moe/spine/:path*"
+    },
+    {
+      "source": "/cf/:path*",
+      "destination": "https://cf-static.shinycolors.moe/:path*"
+    },
+    {
+      "source": "/spine/:path*",
+      "destination": "https://cf-static.shinycolors.moe/spine/:path*"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+dist
+node_modules
+*.local
+pnpm-lock.yaml
+public/v8-spine37.js
+public/*
