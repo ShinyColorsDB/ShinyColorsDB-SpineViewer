@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterView } from 'vue-router'
 import { useOsTheme, darkTheme } from 'naive-ui'
 import type { BuiltInGlobalTheme } from 'naive-ui/lib/themes/interface'
